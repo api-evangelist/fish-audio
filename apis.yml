@@ -1,0 +1,149 @@
+aid: fish-audio
+name: Fish Audio
+description: >-
+  Fish Audio is an AI voice platform offering text-to-speech, voice cloning,
+  speech-to-text, voice changing, and audio storytelling capabilities. The
+  platform hosts a library of over two million voices across 30+ languages and
+  is built around the Fish Speech open-source TTS model and the proprietary
+  Fish Audio S2-Pro model. Fish Audio exposes a public REST API at
+  api.fish.audio with first-party Python, Go, and TypeScript SDKs and supports
+  voice cloning from as little as fifteen seconds of reference audio. The
+  developer surface emphasizes ultra-low latency streaming, emotion control,
+  and pay-as-you-go pricing for both prototype and production workloads.
+type: Index
+position: Provider
+access: 3rd-Party
+image: https://kinlane-productions.s3.amazonaws.com/apis-json/apis-json-logo.jpg
+tags:
+  - Voice
+  - Text to Speech
+  - Speech to Text
+  - Voice Cloning
+  - Audio
+  - Generative AI
+  - Multilingual
+  - Streaming
+  - SDK
+  - Open Source
+url: https://raw.githubusercontent.com/api-evangelist/fish-audio/refs/heads/main/apis.yml
+created: '2026-05-23'
+modified: '2026-05-23'
+specificationVersion: '0.20'
+apis:
+  - aid: fish-audio:fish-audio-api
+    name: Fish Audio API
+    description: >-
+      The Fish Audio API provides RESTful access to text-to-speech,
+      speech-to-text, voice cloning, and voice management capabilities backed
+      by the Fish Audio S2-Pro model. Endpoints support streaming low-latency
+      generation, multilingual synthesis across 30+ languages, emotion control,
+      and on-the-fly custom voice creation from short reference clips. The API
+      is consumed through the Fish Audio Python, Go, and TypeScript SDKs and a
+      community of integrations including n8n.
+    humanURL: https://docs.fish.audio
+    baseURL: https://api.fish.audio
+    tags:
+      - Text to Speech
+      - Voice Cloning
+      - Speech to Text
+      - Streaming
+      - REST
+      - Audio
+    properties:
+      - type: Documentation
+        url: https://docs.fish.audio
+      - type: GettingStarted
+        url: https://docs.fish.audio/quickstart
+      - type: Playground
+        url: https://fish.audio/discovery
+      - type: SDK
+        url: https://github.com/fishaudio/fish-audio-python
+      - type: SDK
+        url: https://github.com/fishaudio/fish-audio-go
+      - type: GitHubOrganization
+        url: https://github.com/fishaudio
+    features:
+      - name: Text-to-Speech Generation
+        description: >-
+          Synthesize natural, emotionally expressive speech from text using
+          the Fish Audio S2-Pro model across 30+ languages.
+      - name: Voice Cloning
+        description: >-
+          Create custom voice models from as little as 15 seconds of reference
+          audio for downstream TTS.
+      - name: Speech-to-Text Transcription
+        description: >-
+          Transcribe audio with multispeaker detection and emotion tagging
+          metadata.
+      - name: Streaming Audio
+        description: >-
+          Low-latency streaming responses suitable for real-time agent, IVR,
+          and live narration use cases.
+      - name: Emotion and Prosody Control
+        description: >-
+          Inline emotion tags (angry, sad, excited) and special effects
+          (laughing, sobbing) for expressive output.
+      - name: Multilingual Synthesis
+        description: >-
+          Native support for English, Mandarin, Japanese, Korean, and more
+          than 25 additional languages.
+      - name: Voice Library
+        description: >-
+          Access to a hosted library of more than two million pre-built
+          voices for instant TTS generation.
+    useCases:
+      - name: Audiobook and Podcast Production
+        description: >-
+          Generate full-length narrated content with multi-character voices
+          via Story Studio workflows.
+      - name: Conversational Agents and IVR
+        description: >-
+          Power voice-first agents and interactive voice response systems
+          with low-latency synthesis.
+      - name: Gaming NPC Dialogue
+        description: >-
+          Create dynamic in-game character voices and barks without manual
+          voice-over sessions.
+      - name: Video and Content Localization
+        description: >-
+          Dub and localize video, social, and marketing content across
+          dozens of languages.
+      - name: Accessibility Tooling
+        description: >-
+          Embed expressive screen reading and assistive voice output in
+          accessibility products.
+    integrations:
+      - name: Python SDK
+      - name: Go SDK
+      - name: TypeScript SDK
+      - name: n8n
+      - name: LangChain
+      - name: Hugging Face
+      - name: Discord
+    authentication:
+      - type: API Key
+        description: >-
+          Requests authenticate using a Bearer API key issued from the Fish
+          Audio dashboard.
+common:
+  - type: Website
+    url: https://fish.audio
+  - type: Documentation
+    url: https://docs.fish.audio
+  - type: Developer Portal
+    url: https://fish.audio/go-api
+  - type: Playground
+    url: https://fish.audio/discovery
+  - type: Pricing
+    url: https://fish.audio/pricing
+  - type: GitHubOrganization
+    url: https://github.com/fishaudio
+  - type: OpenSourceModel
+    url: https://github.com/fishaudio/fish-speech
+  - type: Discord
+    url: https://discord.gg/Es5qTB9BcN
+  - type: Twitter
+    url: https://twitter.com/FishAudio
+maintainers:
+  - FN: Kin Lane
+    email: kin@apievangelist.com

@@ -144,6 +144,8 @@ common:
     url: https://discord.gg/Es5qTB9BcN
   - type: Twitter
     url: https://twitter.com/FishAudio
+  - type: LLMsTxt
+    url: https://docs.fish.audio/llms.txt
 maintainers:
   - FN: Kin Lane
     email: kin@apievangelist.com

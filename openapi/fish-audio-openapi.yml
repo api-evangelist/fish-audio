@@ -1,0 +1,330 @@
+openapi: 3.1.0
+info:
+  title: Fish Audio API
+  description: >-
+    Fish Audio is an AI voice platform offering text-to-speech, voice cloning,
+    speech-to-text, and voice model management. Authentication is by API key
+    issued at https://fish.audio/app/api-keys and presented as a Bearer token.
+  version: "1.0"
+  contact:
+    name: Fish Audio
+    url: https://docs.fish.audio
+servers:
+  - url: https://api.fish.audio
+    description: Production
+security:
+  - bearerAuth: []
+paths:
+  /v1/tts:
+    post:
+      summary: Generate speech from text
+      operationId: textToSpeech
+      parameters:
+        - name: model
+          in: header
+          required: false
+          description: TTS model variant (s1 or s2-pro)
+          schema:
+            type: string
+            enum: [s1, s2-pro]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [text]
+              properties:
+                text:
+                  type: string
+                reference_id:
+                  type: string
+                  description: ID of a voice model to use
+                format:
+                  type: string
+                  enum: [mp3, wav, pcm, opus]
+                  default: mp3
+                latency:
+                  type: string
+                  enum: [normal, balanced]
+                prosody:
+                  type: object
+                  properties:
+                    speed:
+                      type: number
+                    volume:
+                      type: number
+                chunk_length:
+                  type: integer
+      responses:
+        "200":
+          description: Audio stream
+          content:
+            audio/mpeg:
+              schema:
+                type: string
+                format: binary
+  /v1/tts/stream/with-timestamp:
+    post:
+      summary: Stream TTS with per-chunk timestamps (Server-Sent Events)
+      operationId: textToSpeechStreamWithTimestamp
+      parameters:
+        - name: model
+          in: header
+          required: false
+          schema:
+            type: string
+            enum: [s1, s2-pro]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [text]
+              properties:
+                text:
+                  type: string
+                reference_id:
+                  type: string
+                chunk_length:
+                  type: integer
+      responses:
+        "200":
+          description: SSE stream of audio chunks plus timing metadata
+          content:
+            text/event-stream:
+              schema:
+                type: string
+  /v1/asr:
+    post:
+      summary: Speech-to-text
+      operationId: speechToText
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [audio]
+              properties:
+                audio:
+                  type: string
+                  format: binary
+                language:
+                  type: string
+                ignore_timestamps:
+                  type: boolean
+      responses:
+        "200":
+          description: Transcription with optional segment timestamps
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  text:
+                    type: string
+                  duration:
+                    type: number
+                  segments:
+                    type: array
+                    items:
+                      type: object
+  /model:
+    get:
+      summary: List voice models
+      operationId: listModels
+      parameters:
+        - name: page_size
+          in: query
+          schema:
+            type: integer
+        - name: page_number
+          in: query
+          schema:
+            type: integer
+        - name: title
+          in: query
+          schema:
+            type: string
+        - name: tag
+          in: query
+          schema:
+            type: string
+        - name: self
+          in: query
+          schema:
+            type: boolean
+        - name: author_id
+          in: query
+          schema:
+            type: string
+        - name: language
+          in: query
+          schema:
+            type: string
+        - name: title_language
+          in: query
+          schema:
+            type: string
+        - name: sort_by
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Paginated model list
+          content:
+            application/json:
+              schema:
+                type: object
+    post:
+      summary: Create a voice clone model
+      operationId: createModel
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [title]
+              properties:
+                title:
+                  type: string
+                description:
+                  type: string
+                voices:
+                  type: array
+                  items:
+                    type: string
+                    format: binary
+                texts:
+                  type: array
+                  items:
+                    type: string
+                tags:
+                  type: array
+                  items:
+                    type: string
+                visibility:
+                  type: string
+                  enum: [public, unlist, private]
+                cover_image:
+                  type: string
+                  format: binary
+      responses:
+        "200":
+          description: Created model
+          content:
+            application/json:
+              schema:
+                type: object
+  /model/{id}:
+    get:
+      summary: Get a voice model
+      operationId: getModel
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Model details
+          content:
+            application/json:
+              schema:
+                type: object
+    patch:
+      summary: Update a voice model
+      operationId: updateModel
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                description:
+                  type: string
+                cover_image:
+                  type: string
+                visibility:
+                  type: string
+                tags:
+                  type: array
+                  items:
+                    type: string
+      responses:
+        "200":
+          description: Updated
+    delete:
+      summary: Delete a voice model
+      operationId: deleteModel
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Deleted
+  /wallet/{user_id}/package:
+    get:
+      summary: Get user package / balance / subscription
+      operationId: getUserPackage
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          schema:
+            type: string
+            default: self
+      responses:
+        "200":
+          description: Package payload
+          content:
+            application/json:
+              schema:
+                type: object
+  /wallet/{user_id}/api-credit:
+    get:
+      summary: Get API credit balance
+      operationId: getApiCredit
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: check_free_credit
+          in: query
+          schema:
+            type: boolean
+        - name: team_id
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Credit details
+          content:
+            application/json:
+              schema:
+                type: object
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer

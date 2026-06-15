@@ -1,0 +1,1230 @@
+{
+  "item": [
+    {
+      "id": "2aa4c432-c187-4916-a98e-d04fa22b1d12",
+      "name": "Generate speech from text",
+      "request": {
+        "name": "Generate speech from text",
+        "description": {},
+        "url": {
+          "path": [
+            "v1",
+            "tts"
+          ],
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "query": [],
+          "variable": []
+        },
+        "header": [
+          {
+            "disabled": false,
+            "description": "TTS model variant (s1 or s2-pro)",
+            "key": "model",
+            "value": "<string>"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Accept",
+            "value": "audio/mpeg"
+          }
+        ],
+        "method": "POST",
+        "auth": null,
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"text\": \"<string>\",\n  \"reference_id\": \"<string>\",\n  \"format\": \"mp3\",\n  \"latency\": \"<string>\",\n  \"prosody\": {\n    \"speed\": \"<number>\",\n    \"volume\": \"<number>\"\n  },\n  \"chunk_length\": \"<integer>\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "response": [
+        {
+          "id": "97591aeb-6007-410a-8f2e-a800982690f4",
+          "name": "Audio stream",
+          "originalRequest": {
+            "url": {
+              "path": [
+                "v1",
+                "tts"
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "header": [
+              {
+                "description": {
+                  "content": "Added as a part of security scheme: bearer",
+                  "type": "text/plain"
+                },
+                "key": "Authorization",
+                "value": "Bearer <token>"
+              },
+              {
+                "disabled": false,
+                "description": "TTS model variant (s1 or s2-pro)",
+                "key": "model",
+                "value": "<string>"
+              },
+              {
+                "key": "Accept",
+                "value": "audio/mpeg"
+              }
+            ],
+            "method": "POST",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"text\": \"<string>\",\n  \"reference_id\": \"<string>\",\n  \"format\": \"mp3\",\n  \"latency\": \"<string>\",\n  \"prosody\": {\n    \"speed\": \"<number>\",\n    \"volume\": \"<number>\"\n  },\n  \"chunk_length\": \"<integer>\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "status": "OK",
+          "code": 200,
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "audio/mpeg"
+            }
+          ],
+          "body": "string",
+          "cookie": [],
+          "_postman_previewlanguage": "text"
+        }
+      ],
+      "event": [],
+      "protocolProfileBehavior": {
+        "disableBodyPruning": true
+      }
+    },
+    {
+      "id": "2ab6ad05-3f46-4b1e-85db-a59fa43c9e0f",
+      "name": "Stream TTS with per-chunk timestamps (Server-Sent Events)",
+      "request": {
+        "name": "Stream TTS with per-chunk timestamps (Server-Sent Events)",
+        "description": {},
+        "url": {
+          "path": [
+            "v1",
+            "tts",
+            "stream",
+            "with-timestamp"
+          ],
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "query": [],
+          "variable": []
+        },
+        "header": [
+          {
+            "disabled": false,
+            "key": "model",
+            "value": "<string>",
+            "description": ""
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Accept",
+            "value": "text/event-stream"
+          }
+        ],
+        "method": "POST",
+        "auth": null,
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"text\": \"<string>\",\n  \"reference_id\": \"<string>\",\n  \"chunk_length\": \"<integer>\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "response": [
+        {
+          "id": "9bcab86b-ccd0-41b7-8116-36ae9e9a195d",
+          "name": "SSE stream of audio chunks plus timing metadata",
+          "originalRequest": {
+            "url": {
+              "path": [
+                "v1",
+                "tts",
+                "stream",
+                "with-timestamp"
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "header": [
+              {
+                "description": {
+                  "content": "Added as a part of security scheme: bearer",
+                  "type": "text/plain"
+                },
+                "key": "Authorization",
+                "value": "Bearer <token>"
+              },
+              {
+                "disabled": false,
+                "key": "model",
+                "value": "<string>",
+                "description": ""
+              },
+              {
+                "key": "Accept",
+                "value": "text/event-stream"
+              }
+            ],
+            "method": "POST",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"text\": \"<string>\",\n  \"reference_id\": \"<string>\",\n  \"chunk_length\": \"<integer>\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "status": "OK",
+          "code": 200,
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "text/event-stream"
+            }
+          ],
+          "body": "string",
+          "cookie": [],
+          "_postman_previewlanguage": "text"
+        }
+      ],
+      "event": [],
+      "protocolProfileBehavior": {
+        "disableBodyPruning": true
+      }
+    },
+    {
+      "id": "d9eb4e0a-7860-44c4-9589-73dc3870ec70",
+      "name": "Speech-to-text",
+      "request": {
+        "name": "Speech-to-text",
+        "description": {},
+        "url": {
+          "path": [
+            "v1",
+            "asr"
+          ],
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "query": [],
+          "variable": []
+        },
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "multipart/form-data"
+          },
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "method": "POST",
+        "auth": null,
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "audio",
+              "type": "file",
+              "description": "(Required) "
+            },
+            {
+              "key": "language",
+              "value": "<string>",
+              "type": "text",
+              "description": ""
+            },
+            {
+              "key": "ignore_timestamps",
+              "value": "<boolean>",
+              "type": "text",
+              "description": ""
+            }
+          ]
+        }
+      },
+      "response": [
+        {
+          "id": "7afa74e0-792c-4d39-b113-7dce15144dfa",
+          "name": "Transcription with optional segment timestamps",
+          "originalRequest": {
+            "url": {
+              "path": [
+                "v1",
+                "asr"
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "header": [
+              {
+                "description": {
+                  "content": "Added as a part of security scheme: bearer",
+                  "type": "text/plain"
+                },
+                "key": "Authorization",
+                "value": "Bearer <token>"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "POST",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "description": {
+                    "content": "(Required) ",
+                    "type": "text/plain"
+                  },
+                  "key": "audio",
+                  "value": "<binary>",
+                  "type": "text"
+                },
+                {
+                  "description": {
+                    "content": "",
+                    "type": "text/plain"
+                  },
+                  "key": "language",
+                  "value": "<string>",
+                  "type": "text"
+                },
+                {
+                  "description": {
+                    "content": "",
+                    "type": "text/plain"
+                  },
+                  "key": "ignore_timestamps",
+                  "value": "<boolean>",
+                  "type": "text"
+                }
+              ]
+            }
+          },
+          "status": "OK",
+          "code": 200,
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "body": "{\n  \"text\": \"string\",\n  \"duration\": 8718.307978861176\n}",
+          "cookie": [],
+          "_postman_previewlanguage": "json"
+        }
+      ],
+      "event": [],
+      "protocolProfileBehavior": {
+        "disableBodyPruning": true
+      }
+    },
+    {
+      "id": "b1ac0455-aabc-4d4c-9eea-e4bac9ca4e9e",
+      "name": "List voice models",
+      "request": {
+        "name": "List voice models",
+        "description": {},
+        "url": {
+          "path": [
+            "model"
+          ],
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "query": [
+            {
+              "disabled": false,
+              "key": "page_size",
+              "value": "<integer>"
+            },
+            {
+              "disabled": false,
+              "key": "page_number",
+              "value": "<integer>"
+            },
+            {
+              "disabled": false,
+              "key": "title",
+              "value": "<string>"
+            },
+            {
+              "disabled": false,
+              "key": "tag",
+              "value": "<string>"
+            },
+            {
+              "disabled": false,
+              "key": "self",
+              "value": "<boolean>"
+            },
+            {
+              "disabled": false,
+              "key": "author_id",
+              "value": "<string>"
+            },
+            {
+              "disabled": false,
+              "key": "language",
+              "value": "<string>"
+            },
+            {
+              "disabled": false,
+              "key": "title_language",
+              "value": "<string>"
+            },
+            {
+              "disabled": false,
+              "key": "sort_by",
+              "value": "<string>"
+            }
+          ],
+          "variable": []
+        },
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "method": "GET",
+        "auth": null
+      },
+      "response": [
+        {
+          "id": "4c66fb90-9976-42ef-8ad5-c6a44a7643d4",
+          "name": "Paginated model list",
+          "originalRequest": {
+            "url": {
+              "path": [
+                "model"
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [
+                {
+                  "key": "page_size",
+                  "value": "<integer>"
+                },
+                {
+                  "key": "page_number",
+                  "value": "<integer>"
+                },
+                {
+                  "key": "title",
+                  "value": "<string>"
+                },
+                {
+                  "key": "tag",
+                  "value": "<string>"
+                },
+                {
+                  "key": "self",
+                  "value": "<boolean>"
+                },
+                {
+                  "key": "author_id",
+                  "value": "<string>"
+                },
+                {
+                  "key": "language",
+                  "value": "<string>"
+                },
+                {
+                  "key": "title_language",
+                  "value": "<string>"
+                },
+                {
+                  "key": "sort_by",
+                  "value": "<string>"
+                }
+              ],
+              "variable": []
+            },
+            "header": [
+              {
+                "description": {
+                  "content": "Added as a part of security scheme: bearer",
+                  "type": "text/plain"
+                },
+                "key": "Authorization",
+                "value": "Bearer <token>"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "GET",
+            "body": {}
+          },
+          "status": "OK",
+          "code": 200,
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "body": "{}",
+          "cookie": [],
+          "_postman_previewlanguage": "json"
+        }
+      ],
+      "event": [],
+      "protocolProfileBehavior": {
+        "disableBodyPruning": true
+      }
+    },
+    {
+      "id": "cfbb90dd-78fd-4007-9213-88b30f317c7c",
+      "name": "Create a voice clone model",
+      "request": {
+        "name": "Create a voice clone model",
+        "description": {},
+        "url": {
+          "path": [
+            "model"
+          ],
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "query": [],
+          "variable": []
+        },
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "multipart/form-data"
+          },
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "method": "POST",
+        "auth": null,
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "title",
+              "value": "<string>",
+              "type": "text",
+              "description": "(Required) "
+            },
+            {
+              "key": "description",
+              "value": "<string>",
+              "type": "text",
+              "description": ""
+            },
+            {
+              "key": "voices",
+              "value": "[\"<binary>\",\"<binary>\"]",
+              "type": "text",
+              "description": ""
+            },
+            {
+              "key": "texts",
+              "value": "[\"<string>\",\"<string>\"]",
+              "type": "text",
+              "description": ""
+            },
+            {
+              "key": "tags",
+              "value": "[\"<string>\",\"<string>\"]",
+              "type": "text",
+              "description": ""
+            },
+            {
+              "key": "visibility",
+              "value": "<string>",
+              "type": "text",
+              "description": " (This can only be one of public,unlist,private)"
+            },
+            {
+              "key": "cover_image",
+              "type": "file",
+              "description": ""
+            }
+          ]
+        }
+      },
+      "response": [
+        {
+          "id": "2677734f-10f5-4e90-a28f-499aff81c2cf",
+          "name": "Created model",
+          "originalRequest": {
+            "url": {
+              "path": [
+                "model"
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "header": [
+              {
+                "description": {
+                  "content": "Added as a part of security scheme: bearer",
+                  "type": "text/plain"
+                },
+                "key": "Authorization",
+                "value": "Bearer <token>"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "POST",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "description": {
+                    "content": "(Required) ",
+                    "type": "text/plain"
+                  },
+                  "key": "title",
+                  "value": "<string>",
+                  "type": "text"
+                },
+                {
+                  "description": {
+                    "content": "",
+                    "type": "text/plain"
+                  },
+                  "key": "description",
+                  "value": "<string>",
+                  "type": "text"
+                },
+                {
+                  "description": {
+                    "content": "",
+                    "type": "text/plain"
+                  },
+                  "key": "voices",
+                  "value": "[\"<binary>\",\"<binary>\"]",
+                  "type": "text"
+                },
+                {
+                  "description": {
+                    "content": "",
+                    "type": "text/plain"
+                  },
+                  "key": "texts",
+                  "value": "[\"<string>\",\"<string>\"]",
+                  "type": "text"
+                },
+                {
+                  "description": {
+                    "content": "",
+                    "type": "text/plain"
+                  },
+                  "key": "tags",
+                  "value": "[\"<string>\",\"<string>\"]",
+                  "type": "text"
+                },
+                {
+                  "description": {
+                    "content": " (This can only be one of public,unlist,private)",
+                    "type": "text/plain"
+                  },
+                  "key": "visibility",
+                  "value": "<string>",
+                  "type": "text"
+                },
+                {
+                  "description": {
+                    "content": "",
+                    "type": "text/plain"
+                  },
+                  "key": "cover_image",
+                  "value": "<binary>",
+                  "type": "text"
+                }
+              ]
+            }
+          },
+          "status": "OK",
+          "code": 200,
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "body": "{}",
+          "cookie": [],
+          "_postman_previewlanguage": "json"
+        }
+      ],
+      "event": [],
+      "protocolProfileBehavior": {
+        "disableBodyPruning": true
+      }
+    },
+    {
+      "id": "1465e7c3-2164-48bd-8844-564b5cb84015",
+      "name": "Get a voice model",
+      "request": {
+        "name": "Get a voice model",
+        "description": {},
+        "url": {
+          "path": [
+            "model",
+            ":id"
+          ],
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "query": [],
+          "variable": [
+            {
+              "disabled": false,
+              "type": "any",
+              "value": "<string>",
+              "key": "id",
+              "description": "(Required) "
+            }
+          ]
+        },
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "method": "GET",
+        "auth": null
+      },
+      "response": [
+        {
+          "id": "a432fac4-7ab6-474f-bad1-8e16619b563d",
+          "name": "Model details",
+          "originalRequest": {
+            "url": {
+              "path": [
+                "model",
+                ":id"
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "disabled": false,
+                  "type": "any",
+                  "value": "<string>",
+                  "key": "id",
+                  "description": "(Required) "
+                }
+              ]
+            },
+            "header": [
+              {
+                "description": {
+                  "content": "Added as a part of security scheme: bearer",
+                  "type": "text/plain"
+                },
+                "key": "Authorization",
+                "value": "Bearer <token>"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "GET",
+            "body": {}
+          },
+          "status": "OK",
+          "code": 200,
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "body": "{}",
+          "cookie": [],
+          "_postman_previewlanguage": "json"
+        }
+      ],
+      "event": [],
+      "protocolProfileBehavior": {
+        "disableBodyPruning": true
+      }
+    },
+    {
+      "id": "0236789f-4df2-49db-88d7-934da50a5b82",
+      "name": "Update a voice model",
+      "request": {
+        "name": "Update a voice model",
+        "description": {},
+        "url": {
+          "path": [
+            "model",
+            ":id"
+          ],
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "query": [],
+          "variable": [
+            {
+              "disabled": false,
+              "type": "any",
+              "value": "<string>",
+              "key": "id",
+              "description": "(Required) "
+            }
+          ]
+        },
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "method": "PATCH",
+        "auth": null,
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": \"<string>\",\n  \"description\": \"<string>\",\n  \"cover_image\": \"<string>\",\n  \"visibility\": \"<string>\",\n  \"tags\": [\n    \"<string>\",\n    \"<string>\"\n  ]\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "response": [
+        {
+          "id": "8b1f4ff5-e81e-470b-b303-793928560a29",
+          "name": "Updated",
+          "originalRequest": {
+            "url": {
+              "path": [
+                "model",
+                ":id"
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "disabled": false,
+                  "type": "any",
+                  "value": "<string>",
+                  "key": "id",
+                  "description": "(Required) "
+                }
+              ]
+            },
+            "header": [
+              {
+                "description": {
+                  "content": "Added as a part of security scheme: bearer",
+                  "type": "text/plain"
+                },
+                "key": "Authorization",
+                "value": "Bearer <token>"
+              }
+            ],
+            "method": "PATCH",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"<string>\",\n  \"description\": \"<string>\",\n  \"cover_image\": \"<string>\",\n  \"visibility\": \"<string>\",\n  \"tags\": [\n    \"<string>\",\n    \"<string>\"\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "status": "OK",
+          "code": 200,
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "text/plain"
+            }
+          ],
+          "body": "",
+          "cookie": [],
+          "_postman_previewlanguage": "text"
+        }
+      ],
+      "event": [],
+      "protocolProfileBehavior": {
+        "disableBodyPruning": true
+      }
+    },
+    {
+      "id": "fd6101ba-5188-4d8a-b68e-d7896c096b17",
+      "name": "Delete a voice model",
+      "request": {
+        "name": "Delete a voice model",
+        "description": {},
+        "url": {
+          "path": [
+            "model",
+            ":id"
+          ],
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "query": [],
+          "variable": [
+            {
+              "disabled": false,
+              "type": "any",
+              "value": "<string>",
+              "key": "id",
+              "description": "(Required) "
+            }
+          ]
+        },
+        "method": "DELETE",
+        "auth": null
+      },
+      "response": [
+        {
+          "id": "cd8e27aa-3ed8-40bb-90c5-4f351214dd05",
+          "name": "Deleted",
+          "originalRequest": {
+            "url": {
+              "path": [
+                "model",
+                ":id"
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "disabled": false,
+                  "type": "any",
+                  "value": "<string>",
+                  "key": "id",
+                  "description": "(Required) "
+                }
+              ]
+            },
+            "header": [
+              {
+                "description": {
+                  "content": "Added as a part of security scheme: bearer",
+                  "type": "text/plain"
+                },
+                "key": "Authorization",
+                "value": "Bearer <token>"
+              }
+            ],
+            "method": "DELETE",
+            "body": {}
+          },
+          "status": "OK",
+          "code": 200,
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "text/plain"
+            }
+          ],
+          "body": "",
+          "cookie": [],
+          "_postman_previewlanguage": "text"
+        }
+      ],
+      "event": [],
+      "protocolProfileBehavior": {
+        "disableBodyPruning": true
+      }
+    },
+    {
+      "id": "204d8dea-20e5-4ee3-ba5e-a483355fa5c4",
+      "name": "Get user package / balance / subscription",
+      "request": {
+        "name": "Get user package / balance / subscription",
+        "description": {},
+        "url": {
+          "path": [
+            "wallet",
+            ":user_id",
+            "package"
+          ],
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "query": [],
+          "variable": [
+            {
+              "disabled": false,
+              "type": "any",
+              "value": "self",
+              "key": "user_id",
+              "description": "(Required) "
+            }
+          ]
+        },
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "method": "GET",
+        "auth": null
+      },
+      "response": [
+        {
+          "id": "d0680184-53ca-49ec-8407-fbf1a7319e54",
+          "name": "Package payload",
+          "originalRequest": {
+            "url": {
+              "path": [
+                "wallet",
+                ":user_id",
+                "package"
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": [
+                {
+                  "disabled": false,
+                  "type": "any",
+                  "value": "self",
+                  "key": "user_id",
+                  "description": "(Required) "
+                }
+              ]
+            },
+            "header": [
+              {
+                "description": {
+                  "content": "Added as a part of security scheme: bearer",
+                  "type": "text/plain"
+                },
+                "key": "Authorization",
+                "value": "Bearer <token>"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "GET",
+            "body": {}
+          },
+          "status": "OK",
+          "code": 200,
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "body": "{}",
+          "cookie": [],
+          "_postman_previewlanguage": "json"
+        }
+      ],
+      "event": [],
+      "protocolProfileBehavior": {
+        "disableBodyPruning": true
+      }
+    },
+    {
+      "id": "ad9385a3-ef94-470b-a410-fa6491de980d",
+      "name": "Get API credit balance",
+      "request": {
+        "name": "Get API credit balance",
+        "description": {},
+        "url": {
+          "path": [
+            "wallet",
+            ":user_id",
+            "api-credit"
+          ],
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "query": [
+            {
+              "disabled": false,
+              "key": "check_free_credit",
+              "value": "<boolean>"
+            },
+            {
+              "disabled": false,
+              "key": "team_id",
+              "value": "<string>"
+            }
+          ],
+          "variable": [
+            {
+              "disabled": false,
+              "type": "any",
+              "value": "<string>",
+              "key": "user_id",
+              "description": "(Required) "
+            }
+          ]
+        },
+        "header": [
+          {
+            "key": "Accept",
+            "value": "application/json"
+          }
+        ],
+        "method": "GET",
+        "auth": null
+      },
+      "response": [
+        {
+          "id": "5a39c06a-f603-4ec8-a3a7-6191b507e90c",
+          "name": "Credit details",
+          "originalRequest": {
+            "url": {
+              "path": [
+                "wallet",
+                ":user_id",
+                "api-credit"
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [
+                {
+                  "key": "check_free_credit",
+                  "value": "<boolean>"
+                },
+                {
+                  "key": "team_id",
+                  "value": "<string>"
+                }
+              ],
+              "variable": [
+                {
+                  "disabled": false,
+                  "type": "any",
+                  "value": "<string>",
+                  "key": "user_id",
+                  "description": "(Required) "
+                }
+              ]
+            },
+            "header": [
+              {
+                "description": {
+                  "content": "Added as a part of security scheme: bearer",
+                  "type": "text/plain"
+                },
+                "key": "Authorization",
+                "value": "Bearer <token>"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "method": "GET",
+            "body": {}
+          },
+          "status": "OK",
+          "code": 200,
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "body": "{}",
+          "cookie": [],
+          "_postman_previewlanguage": "json"
+        }
+      ],
+      "event": [],
+      "protocolProfileBehavior": {
+        "disableBodyPruning": true
+      }
+    }
+  ],
+  "event": [],
+  "variable": [
+    {
+      "type": "string",
+      "value": "https://api.fish.audio",
+      "key": "baseUrl"
+    }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{bearerToken}}"
+      }
+    ]
+  },
+  "info": {
+    "_postman_id": "96add0a7-ef67-4efc-b92a-e5d44ee37346",
+    "name": "Fish Audio API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": {
+      "content": "Fish Audio is an AI voice platform offering text-to-speech, voice cloning, speech-to-text, and voice model management. Authentication is by API key issued at https://fish.audio/app/api-keys and presented as a Bearer token.\n\nContact Support:\n Name: Fish Audio",
+      "type": "text/plain"
+    }
+  }
+}

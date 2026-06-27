@@ -56,9 +56,9 @@ apis:
         url: https://docs.fish.audio/quickstart
       - type: Playground
         url: https://fish.audio/discovery
-      - type: SDK
+      - type: SDKs
         url: https://github.com/fishaudio/fish-audio-python
-      - type: SDK
+      - type: SDKs
         url: https://github.com/fishaudio/fish-audio-go
       - type: GitHubOrganization
         url: https://github.com/fishaudio
@@ -130,7 +130,7 @@ common:
     url: https://fish.audio
   - type: Documentation
     url: https://docs.fish.audio
-  - type: Developer Portal
+  - type: DeveloperPortal
     url: https://fish.audio/go-api
   - type: Playground
     url: https://fish.audio/discovery
@@ -144,7 +144,7 @@ common:
     url: https://discord.gg/Es5qTB9BcN
   - type: Twitter
     url: https://twitter.com/FishAudio
-  - type: LLMsTxt
+  - type: LlmsText
     url: https://docs.fish.audio/llms.txt
 maintainers:
   - FN: Kin Lane

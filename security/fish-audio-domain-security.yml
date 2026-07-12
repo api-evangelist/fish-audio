@@ -1,0 +1,28 @@
+generated: '2026-07-11'
+method: probed
+source: live DNS/TLS/HTTP probes of apis.yml + OpenAPI hosts
+hosts:
+- host: fish.audio
+  https: true
+  tls_version: TLSv1.3
+  cert_expires: Oct  3 11:43:07 2026 GMT
+  hsts: true
+  hsts_max_age: 63072000
+- host: docs.fish.audio
+  https: true
+  tls_version: TLSv1.3
+  cert_expires: Sep 28 05:35:32 2026 GMT
+  hsts: true
+  hsts_max_age: 63072000
+- host: api.fish.audio
+  https: true
+  tls_version: TLSv1.3
+  cert_expires: Oct  7 10:46:37 2026 GMT
+  hsts: null
+domains:
+- domain: fish.audio
+  dnssec: false
+  caa: []
+  spf: true
+  dmarc: true
+  dmarc_policy: reject

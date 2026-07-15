@@ -126,6 +126,8 @@ apis:
           Requests authenticate using a Bearer API key issued from the Fish
           Audio dashboard.
 common:
+  - type: AgenticAccess
+    url: agentic-access/fish-audio-agentic-access.yml
   - type: DomainSecurity
     url: security/fish-audio-domain-security.yml
   - type: Authentication

@@ -1,0 +1,118 @@
+openapi: 3.1.0
+info:
+  title: Fish Audio Asr Tts API
+  description: Fish Audio is an AI voice platform offering text-to-speech, voice cloning, speech-to-text, and voice model management. Authentication is by API key issued at https://fish.audio/app/api-keys and presented as a Bearer token.
+  version: '1.0'
+  contact:
+    name: Fish Audio
+    url: https://docs.fish.audio
+servers:
+- url: https://api.fish.audio
+  description: Production
+security:
+- bearerAuth: []
+tags:
+- name: Tts
+paths:
+  /v1/tts:
+    post:
+      summary: Generate speech from text
+      operationId: textToSpeech
+      parameters:
+      - name: model
+        in: header
+        required: false
+        description: TTS model variant (s1 or s2-pro)
+        schema:
+          type: string
+          enum:
+          - s1
+          - s2-pro
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - text
+              properties:
+                text:
+                  type: string
+                reference_id:
+                  type: string
+                  description: ID of a voice model to use
+                format:
+                  type: string
+                  enum:
+                  - mp3
+                  - wav
+                  - pcm
+                  - opus
+                  default: mp3
+                latency:
+                  type: string
+                  enum:
+                  - normal
+                  - balanced
+                prosody:
+                  type: object
+                  properties:
+                    speed:
+                      type: number
+                    volume:
+                      type: number
+                chunk_length:
+                  type: integer
+      responses:
+        '200':
+          description: Audio stream
+          content:
+            audio/mpeg:
+              schema:
+                type: string
+                format: binary
+      tags:
+      - Tts
+  /v1/tts/stream/with-timestamp:
+    post:
+      summary: Stream TTS with per-chunk timestamps (Server-Sent Events)
+      operationId: textToSpeechStreamWithTimestamp
+      parameters:
+      - name: model
+        in: header
+        required: false
+        schema:
+          type: string
+          enum:
+          - s1
+          - s2-pro
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - text
+              properties:
+                text:
+                  type: string
+                reference_id:
+                  type: string
+                chunk_length:
+                  type: integer
+      responses:
+        '200':
+          description: SSE stream of audio chunks plus timing metadata
+          content:
+            text/event-stream:
+              schema:
+                type: string
+      tags:
+      - Tts
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer

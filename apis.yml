@@ -11,9 +11,22 @@ description: >-
   developer surface emphasizes ultra-low latency streaming, emotion control,
   and pay-as-you-go pricing for both prototype and production workloads.
 type: Index
+accessModel:
+  pricing: free
+  onboarding: self-serve
+  trial: false
+  try_now: true
+  public: false
+  label: Free · Self-serve signup
+  confidence: high
+  source:
+  - plans
+  - authentication
+  generated: '2026-07-22'
+  method: derived
 position: Provider
 access: 3rd-Party
-image: https://kinlane-images.s3.amazonaws.com/shared/apis-json/apis-json-logo.jpg
+image: https://kinlane-images.s3.amazonaws.com/shared/apis-json/icons/fish-audio.png
 tags:
   - Voice
   - Text to Speech
@@ -30,101 +43,123 @@ created: '2026-05-23'
 modified: '2026-05-23'
 specificationVersion: '0.20'
 apis:
-  - aid: fish-audio:fish-audio-api
-    name: Fish Audio API
+- aid: fish-audio:fish-audio-api
+  name: Fish Audio API
+  description: >-
+    The Fish Audio API provides RESTful access to text-to-speech, speech-to-text, voice cloning, and voice
+    management capabilities backed by the Fish Audio S2-Pro model. Endpoints support streaming low-latency
+    generation, multilingual synthesis across 30+ languages, emotion control, and on-the-fly custom voice
+    creation from short reference clips. The API is consumed through the Fish Audio Python, Go, and TypeScript
+    SDKs and a community of integrations including n8n.
+  humanURL: https://docs.fish.audio
+  baseURL: https://api.fish.audio
+  tags:
+  - Text to Speech
+  - Voice Cloning
+  - Speech to Text
+  - Streaming
+  - REST
+  - Audio
+  properties:
+  - type: Documentation
+    url: https://docs.fish.audio
+  - type: GettingStarted
+    url: https://docs.fish.audio/quickstart
+  - type: Playground
+    url: https://fish.audio/discovery
+  - type: SDKs
+    url: https://github.com/fishaudio/fish-audio-python
+  - type: SDKs
+    url: https://github.com/fishaudio/fish-audio-go
+  - type: GitHubOrganization
+    url: https://github.com/fishaudio
+  features:
+  - name: Text-to-Speech Generation
     description: >-
-      The Fish Audio API provides RESTful access to text-to-speech,
-      speech-to-text, voice cloning, and voice management capabilities backed
-      by the Fish Audio S2-Pro model. Endpoints support streaming low-latency
-      generation, multilingual synthesis across 30+ languages, emotion control,
-      and on-the-fly custom voice creation from short reference clips. The API
-      is consumed through the Fish Audio Python, Go, and TypeScript SDKs and a
-      community of integrations including n8n.
-    humanURL: https://docs.fish.audio
-    baseURL: https://api.fish.audio
-    tags:
-      - Text to Speech
-      - Voice Cloning
-      - Speech to Text
-      - Streaming
-      - REST
-      - Audio
-    properties:
-      - type: Documentation
-        url: https://docs.fish.audio
-      - type: GettingStarted
-        url: https://docs.fish.audio/quickstart
-      - type: Playground
-        url: https://fish.audio/discovery
-      - type: SDKs
-        url: https://github.com/fishaudio/fish-audio-python
-      - type: SDKs
-        url: https://github.com/fishaudio/fish-audio-go
-      - type: GitHubOrganization
-        url: https://github.com/fishaudio
-    features:
-      - name: Text-to-Speech Generation
-        description: >-
-          Synthesize natural, emotionally expressive speech from text using
-          the Fish Audio S2-Pro model across 30+ languages.
-      - name: Voice Cloning
-        description: >-
-          Create custom voice models from as little as 15 seconds of reference
-          audio for downstream TTS.
-      - name: Speech-to-Text Transcription
-        description: >-
-          Transcribe audio with multispeaker detection and emotion tagging
-          metadata.
-      - name: Streaming Audio
-        description: >-
-          Low-latency streaming responses suitable for real-time agent, IVR,
-          and live narration use cases.
-      - name: Emotion and Prosody Control
-        description: >-
-          Inline emotion tags (angry, sad, excited) and special effects
-          (laughing, sobbing) for expressive output.
-      - name: Multilingual Synthesis
-        description: >-
-          Native support for English, Mandarin, Japanese, Korean, and more
-          than 25 additional languages.
-      - name: Voice Library
-        description: >-
-          Access to a hosted library of more than two million pre-built
-          voices for instant TTS generation.
-    useCases:
-      - name: Audiobook and Podcast Production
-        description: >-
-          Generate full-length narrated content with multi-character voices
-          via Story Studio workflows.
-      - name: Conversational Agents and IVR
-        description: >-
-          Power voice-first agents and interactive voice response systems
-          with low-latency synthesis.
-      - name: Gaming NPC Dialogue
-        description: >-
-          Create dynamic in-game character voices and barks without manual
-          voice-over sessions.
-      - name: Video and Content Localization
-        description: >-
-          Dub and localize video, social, and marketing content across
-          dozens of languages.
-      - name: Accessibility Tooling
-        description: >-
-          Embed expressive screen reading and assistive voice output in
-          accessibility products.
-    integrations:
-      - name: Python SDK
-      - name: Go SDK
-      - name: TypeScript SDK
-      - name: n8n
-      - name: LangChain
-      - name: Hugging Face
-      - name: Discord
-    authentication:
-      - type: API Key
-        description: >-
-          Requests authenticate using a Bearer API key issued from the Fish
-          Audio dashboard.
+      Synthesize natural, emotionally expressive speech from text using the Fish Audio S2-Pro model across
+      30+ languages.
+  - name: Voice Cloning
+    description: >-
+      Create custom voice models from as little as 15 seconds of reference audio for downstream TTS.
+  - name: Speech-to-Text Transcription
+    description: Transcribe audio with multispeaker detection and emotion tagging metadata.
+  - name: Streaming Audio
+    description: >-
+      Low-latency streaming responses suitable for real-time agent, IVR, and live narration use cases.
+  - name: Emotion and Prosody Control
+    description: >-
+      Inline emotion tags (angry, sad, excited) and special effects (laughing, sobbing) for expressive
+      output.
+  - name: Multilingual Synthesis
+    description: >-
+      Native support for English, Mandarin, Japanese, Korean, and more than 25 additional languages.
+  - name: Voice Library
+    description: >-
+      Access to a hosted library of more than two million pre-built voices for instant TTS generation.
+  useCases:
+  - name: Audiobook and Podcast Production
+    description: >-
+      Generate full-length narrated content with multi-character voices via Story Studio workflows.
+  - name: Conversational Agents and IVR
+    description: >-
+      Power voice-first agents and interactive voice response systems with low-latency synthesis.
+  - name: Gaming NPC Dialogue
+    description: Create dynamic in-game character voices and barks without manual voice-over sessions.
+  - name: Video and Content Localization
+    description: Dub and localize video, social, and marketing content across dozens of languages.
+  - name: Accessibility Tooling
+    description: Embed expressive screen reading and assistive voice output in accessibility products.
+  integrations:
+  - name: Python SDK
+  - name: Go SDK
+  - name: TypeScript SDK
+  - name: n8n
+  - name: LangChain
+  - name: Hugging Face
+  - name: Discord
+  authentication:
+  - type: API Key
+    description: Requests authenticate using a Bearer API key issued from the Fish Audio dashboard.
+- aid: fish-audio:fish-audio-asr-api
+  name: Fish Audio Asr API
+  description: The Asr API from Fish Audio — 1 operation(s) for asr.
+  humanURL: https://docs.fish.audio
+  baseURL: https://api.fish.audio
+  tags:
+  - Asr
+  properties:
+  - type: OpenAPI
+    url: openapi/fish-audio-asr-api-openapi.yml
+- aid: fish-audio:fish-audio-model-api
+  name: Fish Audio Model API
+  description: The Model API from Fish Audio — 2 operation(s) for model.
+  humanURL: https://docs.fish.audio
+  baseURL: https://api.fish.audio
+  tags:
+  - Model
+  properties:
+  - type: OpenAPI
+    url: openapi/fish-audio-model-api-openapi.yml
+- aid: fish-audio:fish-audio-tts-api
+  name: Fish Audio Tts API
+  description: The Tts API from Fish Audio — 2 operation(s) for tts.
+  humanURL: https://docs.fish.audio
+  baseURL: https://api.fish.audio
+  tags:
+  - Tts
+  properties:
+  - type: OpenAPI
+    url: openapi/fish-audio-tts-api-openapi.yml
+- aid: fish-audio:fish-audio-wallet-api
+  name: Fish Audio Wallet API
+  description: The Wallet API from Fish Audio — 2 operation(s) for wallet.
+  humanURL: https://docs.fish.audio
+  baseURL: https://api.fish.audio
+  tags:
+  - Wallet
+  properties:
+  - type: OpenAPI
+    url: openapi/fish-audio-wallet-api-openapi.yml
 common:
   - type: AgenticAccess
     url: agentic-access/fish-audio-agentic-access.yml

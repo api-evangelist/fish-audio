@@ -1,0 +1,20 @@
+{
+  "provider": "fish-audio",
+  "sources": [
+    "fish-audio-asr-api-openapi.yml",
+    "fish-audio-model-api-openapi.yml",
+    "fish-audio-tts-api-openapi.yml",
+    "fish-audio-wallet-api-openapi.yml"
+  ],
+  "outputs": [
+    "fish-audio-asr-api-openapi.yml",
+    "fish-audio-model-api-openapi.yml",
+    "fish-audio-tts-api-openapi.yml",
+    "fish-audio-wallet-api-openapi.yml"
+  ],
+  "archived": [],
+  "errors": [],
+  "warnings": [],
+  "notes": [],
+  "skipped": []
+}

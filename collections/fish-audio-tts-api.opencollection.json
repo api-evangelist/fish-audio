@@ -1,0 +1,66 @@
+{
+  "opencollection": "1.0.0",
+  "info": {
+    "name": "Fish Audio Asr Tts API",
+    "version": "1.0"
+  },
+  "request": {
+    "auth": {
+      "type": "bearer",
+      "token": "{{bearerToken}}"
+    }
+  },
+  "items": [
+    {
+      "info": {
+        "name": "Tts",
+        "type": "folder"
+      },
+      "items": [
+        {
+          "info": {
+            "name": "Generate speech from text",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://api.fish.audio/v1/tts",
+            "headers": [
+              {
+                "name": "model",
+                "value": ""
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Generate speech from text"
+        },
+        {
+          "info": {
+            "name": "Stream TTS with per-chunk timestamps (Server-Sent Events)",
+            "type": "http"
+          },
+          "http": {
+            "method": "POST",
+            "url": "https://api.fish.audio/v1/tts/stream/with-timestamp",
+            "headers": [
+              {
+                "name": "model",
+                "value": ""
+              }
+            ],
+            "body": {
+              "type": "json",
+              "data": "{}"
+            }
+          },
+          "docs": "Stream TTS with per-chunk timestamps (Server-Sent Events)"
+        }
+      ]
+    }
+  ],
+  "bundled": true
+}

@@ -29,6 +29,17 @@ access: 3rd-Party
 image: https://kinlane-images.s3.amazonaws.com/shared/apis-json/icons/fish-audio.png
 tags:
   - Voice
+  - Text-to-Speech
+  - Speech-to-Text
+  - Voice Cloning
+  - Audio
+  - Generative AI
+  - Multilingual
+  - Streaming
+  - SDK
+  - Open-Source
+tags_raw:
+  - Voice
   - Text to Speech
   - Speech to Text
   - Voice Cloning
@@ -54,6 +65,13 @@ apis:
   humanURL: https://docs.fish.audio
   baseURL: https://api.fish.audio
   tags:
+  - Text-to-Speech
+  - Voice Cloning
+  - Speech-to-Text
+  - Streaming
+  - REST
+  - Audio
+  tags_raw:
   - Text to Speech
   - Voice Cloning
   - Speech to Text
@@ -126,6 +144,8 @@ apis:
   humanURL: https://docs.fish.audio
   baseURL: https://api.fish.audio
   tags:
+  - ASR
+  tags_raw:
   - Asr
   properties:
   - type: OpenAPI
@@ -146,6 +166,8 @@ apis:
   humanURL: https://docs.fish.audio
   baseURL: https://api.fish.audio
   tags:
+  - TTS
+  tags_raw:
   - Tts
   properties:
   - type: OpenAPI
@@ -156,6 +178,8 @@ apis:
   humanURL: https://docs.fish.audio
   baseURL: https://api.fish.audio
   tags:
+  - Wallets
+  tags_raw:
   - Wallet
   properties:
   - type: OpenAPI

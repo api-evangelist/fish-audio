@@ -41,7 +41,7 @@ access: 3rd-Party
 image: https://kinlane-images.s3.amazonaws.com/shared/apis-json/icons/fish-audio.png
 tags:
   - Voice
-  - Text to Speech
+  - Text-to-Speech
   - Speech-to-Text
   - Voice Cloning
   - Audio
@@ -77,7 +77,7 @@ apis:
   humanURL: https://docs.fish.audio
   baseURL: https://api.fish.audio
   tags:
-  - Text to Speech
+  - Text-to-Speech
   - Voice Cloning
   - Speech-to-Text
   - Streaming
@@ -156,7 +156,7 @@ apis:
   humanURL: https://docs.fish.audio
   baseURL: https://api.fish.audio
   tags:
-  - Asr
+  - ASR
   tags_raw:
   - Asr
   properties:

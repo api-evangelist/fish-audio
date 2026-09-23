@@ -1,0 +1,1 @@
+{"resource":"https://api.fish.audio/mcp","authorization_servers":["https://api.fish.audio"],"scopes_supported":["mcp"],"bearer_methods_supported":["header"],"resource_name":"Fish Audio"}

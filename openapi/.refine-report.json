@@ -1,10 +1,7 @@
 {
   "provider": "fish-audio",
   "sources": [
-    "fish-audio-asr-api-openapi.yml",
-    "fish-audio-model-api-openapi.yml",
-    "fish-audio-tts-api-openapi.yml",
-    "fish-audio-wallet-api-openapi.yml"
+    "_original/fish-audio-openapi.yml"
   ],
   "outputs": [
     "fish-audio-asr-api-openapi.yml",
@@ -15,6 +12,29 @@
   "archived": [],
   "errors": [],
   "warnings": [],
-  "notes": [],
-  "skipped": []
+  "notes": [
+    "sourced from openapi/_original/ (1 archived document(s)); previously refined output at the top level was skipped rather than re-split",
+    "fish-audio-openapi.yml: upgraded openapi 3.1.0 -> OpenAPI 3.2.0",
+    "fish-audio-openapi.yml: tagged paths POST /v1/tts -> Tts",
+    "fish-audio-openapi.yml: tagged paths POST /v1/tts/stream/with-timestamp -> Tts",
+    "fish-audio-openapi.yml: tagged paths POST /v1/asr -> Asr",
+    "fish-audio-openapi.yml: tagged paths GET /model -> Model",
+    "fish-audio-openapi.yml: tagged paths POST /model -> Model",
+    "fish-audio-openapi.yml: tagged paths GET /model/{id} -> Model",
+    "fish-audio-openapi.yml: tagged paths PATCH /model/{id} -> Model",
+    "fish-audio-openapi.yml: tagged paths DELETE /model/{id} -> Model",
+    "fish-audio-openapi.yml: tagged paths GET /wallet/{user_id}/package -> Wallet",
+    "fish-audio-openapi.yml: tagged paths GET /wallet/{user_id}/api-credit -> Wallet",
+    "fish-audio-openapi.yml: declared missing tag: Asr",
+    "fish-audio-openapi.yml: declared missing tag: Model",
+    "fish-audio-openapi.yml: declared missing tag: Tts",
+    "fish-audio-openapi.yml: declared missing tag: Wallet",
+    "apis.yml register: already-registered"
+  ],
+  "skipped": [
+    "fish-audio-asr-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "fish-audio-model-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "fish-audio-tts-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "fish-audio-wallet-api-openapi.yml: previously refined output, superseded by openapi/_original/"
+  ]
 }

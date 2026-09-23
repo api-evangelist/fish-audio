@@ -1,4 +1,4 @@
-openapi: 3.1.0
+openapi: 3.2.0
 info:
   title: Fish Audio Asr API
   description: Fish Audio is an AI voice platform offering text-to-speech, voice cloning, speech-to-text, and voice model management. Authentication is by API key issued at https://fish.audio/app/api-keys and presented as a Bearer token.
@@ -12,7 +12,7 @@ servers:
 security:
 - bearerAuth: []
 tags:
-- name: Asr
+- name: ASR
 paths:
   /v1/asr:
     post:
@@ -51,7 +51,7 @@ paths:
                     items:
                       type: object
       tags:
-      - Asr
+      - ASR
 components:
   securitySchemes:
     bearerAuth:

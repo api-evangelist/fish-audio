@@ -50,7 +50,7 @@ tags:
   - Multilingual
   - Streaming
   - SDK
-  - Open-Source
+  - Open Source
 tags_raw:
   - Voice
   - Text to Speech
@@ -62,6 +62,7 @@ tags_raw:
   - Streaming
   - SDK
   - Open Source
+  - Open-Source
 url: https://raw.githubusercontent.com/api-evangelist/fish-audio/refs/heads/main/apis.yml
 created: '2026-05-23'
 modified: '2026-05-23'

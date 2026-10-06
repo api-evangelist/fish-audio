@@ -69,7 +69,7 @@ tags_raw:
   - Open-Source
 url: https://raw.githubusercontent.com/api-evangelist/fish-audio/refs/heads/main/apis.yml
 created: '2026-05-23'
-modified: '2026-05-23'
+modified: '2026-10-06'
 specificationVersion: '0.23'
 apis:
 - aid: fish-audio:fish-audio-api
@@ -203,6 +203,8 @@ apis:
   - type: OpenAPI
     url: openapi/fish-audio-wallet-api-openapi.yml
 common:
+  - url: https://fish.audio/blog/
+    type: Blog
   - type: AgenticAccess
     url: agentic-access/fish-audio-agentic-access.yml
   - type: DomainSecurity

@@ -203,6 +203,12 @@ apis:
   - type: OpenAPI
     url: openapi/fish-audio-wallet-api-openapi.yml
 common:
+  - type: Plans
+    url: plans/fish-audio-plans-pricing.yml
+  - type: RateLimits
+    url: rate-limits/fish-audio-rate-limits.yml
+  - type: FinOps
+    url: finops/fish-audio-finops.yml
   - url: https://fish.audio/blog/
     type: Blog
   - type: AgenticAccess

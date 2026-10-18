@@ -162,9 +162,10 @@ apis:
   humanURL: https://docs.fish.audio
   baseURL: https://api.fish.audio
   tags:
-  - ASR
+  - Speech Recognition
   tags_raw:
   - Asr
+  - ASR
   properties:
   - type: OpenAPI
     url: openapi/fish-audio-asr-api-openapi.yml

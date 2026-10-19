@@ -1,0 +1,3965 @@
+openapi: 3.2.0
+info:
+  title: FishAudio Open Agents API
+  version: '1'
+servers:
+- description: Fish Audio API
+  url: https://api.fish.audio
+tags:
+- name: Agents
+paths:
+  /v1/agent/agents:
+    get:
+      summary: List Agents
+      description: 'List your team''s agents, newest first. Paginate with `cursor` (follow
+
+        `next_cursor` while `has_more` is true) or with `page` for offset
+
+        pagination with a `total` count — the two are mutually exclusive.'
+      security:
+      - BearerAuth: []
+      parameters:
+      - in: query
+        name: search
+        description: Case-insensitive match on name and description.
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          default: null
+          title: Search
+        deprecated: false
+      - in: query
+        name: include_archived
+        description: ''
+        required: false
+        schema:
+          default: false
+          title: Include Archived
+          type: boolean
+        deprecated: false
+      - in: query
+        name: publication_state
+        description: '`live` = has a published version; `draft` = never published.'
+        required: false
+        schema:
+          default: all
+          enum:
+          - all
+          - live
+          - draft
+          title: Publication State
+          type: string
+        deprecated: false
+      - in: query
+        name: cursor
+        description: ''
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          default: null
+          title: Cursor
+        deprecated: false
+      - in: query
+        name: page
+        description: 1-based page number (offset pagination). Returns total; mutually exclusive with cursor.
+        required: false
+        schema:
+          anyOf:
+          - minimum: 1
+            type: integer
+          - type: 'null'
+          default: null
+          title: Page
+        deprecated: false
+      - in: query
+        name: include_total
+        description: Also count the filtered set on the cursor path.
+        required: false
+        schema:
+          default: false
+          title: Include Total
+          type: boolean
+        deprecated: false
+      - in: query
+        name: page_size
+        description: ''
+        required: false
+        schema:
+          default: 30
+          maximum: 100
+          minimum: 1
+          title: Page Size
+          type: integer
+        deprecated: false
+      responses:
+        '200':
+          description: Request fulfilled, document follows
+          headers: {}
+          content:
+            application/json:
+              schema:
+                properties:
+                  agents:
+                    items:
+                      $ref: '#/components/schemas/PublicAgentEntity'
+                    title: Agents
+                    type: array
+                  has_more:
+                    title: Has More
+                    type: boolean
+                  next_cursor:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    title: Next Cursor
+                  total:
+                    anyOf:
+                    - type: integer
+                    - type: 'null'
+                    default: null
+                    title: Total
+                required:
+                - agents
+                - has_more
+                type: object
+        '400':
+          description: Bad request syntax or unsupported method
+          headers: {}
+          content:
+            application/json:
+              schema:
+                properties:
+                  status:
+                    title: Status
+                    type: integer
+                  message:
+                    title: Message
+                    type: string
+                  reason:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    title: Reason
+                required:
+                - status
+                - message
+                type: object
+        '401':
+          description: No permission -- see authorization schemes
+          headers: {}
+          content:
+            application/json:
+              schema:
+                properties:
+                  status:
+                    title: Status
+                    type: integer
+                  message:
+                    title: Message
+                    type: string
+                  reason:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    title: Reason
+                required:
+                - status
+                - message
+                type: object
+        '503':
+          description: The server cannot process the request due to a high load
+          headers: {}
+          content:
+            application/json:
+              schema:
+                properties:
+                  status:
+                    title: Status
+                    type: integer
+                  message:
+                    title: Message
+                    type: string
+                  reason:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    title: Reason
+                required:
+                - status
+                - message
+                type: object
+      tags:
+      - Agents
+      operationId: getV1AgentAgents
+      x-operation-id-source: derived
+    post:
+      summary: Create Agent
+      description: 'Create an agent, optionally with its full initial configuration inline —
+
+        one call provisions a ready-to-publish agent. The agent starts as a draft:
+
+        publish it before creating sessions with it.'
+      security:
+      - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PublicAgentCreatePayload'
+      responses:
+        '201':
+          description: Document created, URL follows
+          headers: {}
+          content:
+            application/json:
+              schema:
+                properties:
+                  agent_id:
+                    title: Agent Id
+                    type: string
+                  workspace_id:
+                    title: Workspace Id
+                    type: string
+                  name:
+                    title: Name
+                    type: string
+                  description:
+                    default: ''
+                    title: Description
+                    type: string
+                  status:
+                    enum:
+                    - active
+                    - archived
+                    title: Status
+                    type: string
+                  publication_state:
+                    description: '`live` once at least one version is published; `draft` agents cannot take sessions yet.'
+                    enum:
+                    - live
+                    - draft
+                    title: Publication State
+                    type: string
+                  public_enabled:
+                    default: false
+                    title: Public Enabled
+                    type: boolean
+                  allowed_origins:
+                    items:
+                      type: string
+                    title: Allowed Origins
+                    type: array
+                  overrides_allowed:
+                    items:
+                      enum:
+                      - first_message
+                      - system_prompt
+                      - voice_id
+                      - language
+                      - asr.model
+                      type: string
+                    title: Overrides Allowed
+                    type: array
+                  created_at:
+                    format: date-time
+                    title: Created At
+                    type: string
+                  updated_at:
+                    format: date-time
+                    title: Updated At
+                    type: string
+                required:
+                - agent_id
+                - workspace_id
+                - name
+                - status
+                - publication_state
+                - created_at
+                - updated_at
+                type: object
+        '401':
+          description: No permission -- see authorization schemes
+          headers: {}
+          content:
+            application/json:
+              schema:
+                properties:
+                  status:
+                    title: Status
+                    type: integer
+                  message:
+                    title: Message
+                    type: string
+                  reason:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    title: Reason
+                required:
+                - status
+                - message
+                type: object
+        '403':
+          description: Request forbidden -- authorization will not help
+          headers: {}
+          content:
+            application/json:
+              schema:
+                properties:
+                  status:
+                    title: Status
+                    type: integer
+                  message:
+                    title: Message
+                    type: string
+                  reason:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    title: Reason
+                required:
+                - status
+                - message
+                type: object
+        '422':
+          description: ''
+          headers: {}
+          content:
+            application/json:
+              schema:
+                properties:
+                  status:
+                    title: Status
+                    type: integer
+                  message:
+                    title: Message
+                    type: string
+                  reason:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    title: Reason
+                required:
+                - status
+                - message
+                type: object
+        '503':
+          description: The server cannot process the request due to a high load
+          headers: {}
+          content:
+            application/json:
+              schema:
+                properties:
+                  status:
+                    title: Status
+                    type: integer
+                  message:
+                    title: Message
+                    type: string
+                  reason:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    title: Reason
+                required:
+                - status
+                - message
+                type: object
+      tags:
+      - Agents
+      x-codeSamples:
+      - lang: bash
+        label: Create Agent
+        source: "curl --request POST \\\n  --url https://api.fish.audio/v1/agent/agents \\\n  --header 'Authorization: Bearer <token>' \\\n  --header 'Content-Type: application/json' \\\n  --data '{\n    \"name\": \"Receptionist\",\n    \"description\": \"Handles inbound calls.\",\n    \"config\": {\n      \"prompt\": {\n        \"system_prompt\": \"You are the receptionist for Fish Dental.\"\n      },\n      \"voice\": {\n        \"voice_id\": \"<voice-model-id>\",\n        \"speaking_language\": \"en\"\n      }\n    }\n  }'"
+      operationId: postV1AgentAgents
+      x-operation-id-source: derived
+  /v1/agent/agents/{agent_id}:
+    get:
+      summary: Get Agent
+      description: 'Fetch one agent''s profile fields. The draft configuration lives at
+
+        `GET /v1/agent/agents/{agent_id}/config`.'
+      security:
+      - BearerAuth: []
+      parameters:
+      - in: path
+        name: agent_id
+        description: ''
+        required: true
+        schema:
+          title: Agent Id
+          type: string
+        deprecated: false
+      responses:
+        '200':
+          description: Request fulfilled, document follows
+          headers: {}
+          content:
+            application/json:
+              schema:
+                properties:
+                  agent_id:
+                    title: Agent Id
+                    type: string
+                  workspace_id:
+                    title: Workspace Id
+                    type: string
+                  name:
+                    title: Name
+                    type: string
+                  description:
+                    default: ''
+                    title: Description
+                    type: string
+                  status:
+                    enum:
+                    - active
+                    - archived
+                    title: Status
+                    type: string
+                  publication_state:
+                    description: '`live` once at least one version is published; `draft` agents cannot take sessions yet.'
+                    enum:
+                    - live
+                    - draft
+                    title: Publication State
+                    type: string
+                  public_enabled:
+                    default: false
+                    title: Public Enabled
+                    type: boolean
+                  allowed_origins:
+                    items:
+                      type: string
+                    title: Allowed Origins
+                    type: array
+                  overrides_allowed:
+                    items:
+                      enum:
+                      - first_message
+                      - system_prompt
+                      - voice_id
+                      - language
+                      - asr.model
+                      type: string
+                    title: Overrides Allowed
+                    type: array
+                  created_at:
+                    format: date-time
+                    title: Created At
+                    type: string
+                  updated_at:
+                    format: date-time
+                    title: Updated At
+                    type: string
+                required:
+                - agent_id
+                - workspace_id
+                - name
+                - status
+                - publication_state
+                - created_at
+                - updated_at
+                type: object
+        '401':
+          description: No permission -- see authorization schemes
+          headers: {}
+          content:
+            application/json:
+              schema:
+                properties:
+                  status:
+                    title: Status
+                    type: integer
+                  message:
+                    title: Message
+                    type: string
+                  reason:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    title: Reason
+                required:
+                - status
+                - message
+                type: object
+        '404':
+          description: Nothing matches the given URI
+          headers: {}
+          content:
+            application/json:
+              schema:
+                properties:
+                  status:
+                    title: Status
+                    type: integer
+                  message:
+                    title: Message
+                    type: string
+                  reason:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    title: Reason
+                required:
+                - status
+                - message
+                type: object
+        '503':
+          description: The server cannot process the request due to a high load
+          headers: {}
+          content:
+            application/json:
+              schema:
+                properties:
+                  status:
+                    title: Status
+                    type: integer
+                  message:
+                    title: Message
+                    type: string
+                  reason:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    title: Reason
+                required:
+                - status
+                - message
+                type: object
+      tags:
+      - Agents
+      operationId: getV1AgentAgentsByAgentId
+      x-operation-id-source: derived
+    patch:
+      summary: Update Agent
+      description: 'Update agent-level fields (name, description, status, public access and
+
+        session-override policy). Omitted fields keep their value. Conversation
+
+        behavior — voice, prompt, recording and the rest — is draft configuration:
+
+        use `PATCH /v1/agent/agents/{agent_id}/config`.'
+      security:
+      - BearerAuth: []
+      parameters:
+      - in: path
+        name: agent_id
+        description: ''
+        required: true
+        schema:
+          title: Agent Id
+          type: string
+        deprecated: false
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PublicAgentUpdatePayload'
+      responses:
+        '200':
+          description: Request fulfilled, document follows
+          headers: {}
+          content:
+            application/json:
+              schema:
+                properties:
+                  agent_id:
+                    title: Agent Id
+                    type: string
+                  workspace_id:
+                    title: Workspace Id
+                    type: string
+                  name:
+                    title: Name
+                    type: string
+                  description:
+                    default: ''
+                    title: Description
+                    type: string
+                  status:
+                    enum:
+                    - active
+                    - archived
+                    title: Status
+                    type: string
+                  publication_state:
+                    description: '`live` once at least one version is published; `draft` agents cannot take sessions yet.'
+                    enum:
+                    - live
+                    - draft
+                    title: Publication State
+                    type: string
+                  public_enabled:
+                    default: false
+                    title: Public Enabled
+                    type: boolean
+                  allowed_origins:
+                    items:
+                      type: string
+                    title: Allowed Origins
+                    type: array
+                  overrides_allowed:
+                    items:
+                      enum:
+                      - first_message
+                      - system_prompt
+                      - voice_id
+                      - language
+                      - asr.model
+                      type: string
+                    title: Overrides Allowed
+                    type: array
+                  created_at:
+                    format: date-time
+                    title: Created At
+                    type: string
+                  updated_at:
+                    format: date-time
+                    title: Updated At
+                    type: string
+                required:
+                - agent_id
+                - workspace_id
+                - name
+                - status
+                - publication_state
+                - created_at
+                - updated_at
+                type: object
+        '401':
+          description: No permission -- see authorization schemes
+          headers: {}
+          content:
+            application/json:
+              schema:
+                properties:
+                  status:
+                    title: Status
+                    type: integer
+                  message:
+                    title: Message
+                    type: string
+                  reason:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    title: Reason
+                required:
+                - status
+                - message
+                type: object
+        '404':
+          description: Nothing matches the given URI
+          headers: {}
+          content:
+            application/json:
+              schema:
+                properties:
+                  status:
+                    title: Status
+                    type: integer
+                  message:
+                    title: Message
+                    type: string
+                  reason:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    title: Reason
+                required:
+                - status
+                - message
+                type: object
+        '422':
+          description: ''
+          headers: {}
+          content:
+            application/json:
+              schema:
+                properties:
+                  status:
+                    title: Status
+                    type: integer
+                  message:
+                    title: Message
+                    type: string
+                  reason:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    title: Reason
+                required:
+                - status
+                - message
+                type: object
+        '503':
+          description: The server cannot process the request due to a high load
+          headers: {}
+          content:
+            application/json:
+              schema:
+                properties:
+                  status:
+                    title: Status
+                    type: integer
+                  message:
+                    title: Message
+                    type: string
+                  reason:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    title: Reason
+                required:
+                - status
+                - message
+                type: object
+      tags:
+      - Agents
+      operationId: patchV1AgentAgentsByAgentId
+      x-operation-id-source: derived
+    delete:
+      summary: Delete Agent
+      description: 'Delete an agent together with its configuration and version history.
+
+        Existing session records are retained.'
+      security:
+      - BearerAuth: []
+      parameters:
+      - in: path
+        name: agent_id
+        description: ''
+        required: true
+        schema:
+          title: Agent Id
+          type: string
+        deprecated: false
+      responses:
+        '204':
+          description: Request fulfilled, nothing follows
+          headers: {}
+        '401':
+          description: No permission -- see authorization schemes
+          headers: {}
+          content:
+            application/json:
+              schema:
+                properties:
+                  status:
+                    title: Status
+                    type: integer
+                  message:
+                    title: Message
+                    type: string
+                  reason:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    title: Reason
+                required:
+                - status
+                - message
+                type: object
+        '404':
+          description: Nothing matches the given URI
+          headers: {}
+          content:
+            application/json:
+              schema:
+                properties:
+                  status:
+                    title: Status
+                    type: integer
+                  message:
+                    title: Message
+                    type: string
+                  reason:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    title: Reason
+                required:
+                - status
+                - message
+                type: object
+        '503':
+          description: The server cannot process the request due to a high load
+          headers: {}
+          content:
+            application/json:
+              schema:
+                properties:
+                  status:
+                    title: Status
+                    type: integer
+                  message:
+                    title: Message
+                    type: string
+                  reason:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    title: Reason
+                required:
+                - status
+                - message
+                type: object
+      tags:
+      - Agents
+      operationId: deleteV1AgentAgentsByAgentId
+      x-operation-id-source: derived
+  /v1/agent/agents/{agent_id}/widget:
+    get:
+      summary: Get Widget Config
+      description: 'Unauthenticated display configuration for the embeddable ``
+
+        widget. Only agents published as public are reachable, and the request
+
+        `Origin` must match the agent''s allowed origins — the same gate as
+
+        anonymous session creation. Attributes set on the embed tag override
+
+        every field returned here.'
+      parameters:
+      - in: path
+        name: agent_id
+        description: ''
+        required: true
+        schema:
+          title: Agent Id
+          type: string
+        deprecated: false
+      - in: header
+        name: origin
+        description: ''
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          default: null
+          title: Origin
+        deprecated: false
+      responses:
+        '200':
+          description: Request fulfilled, document follows
+          headers: {}
+          content:
+            application/json:
+              schema:
+                description: 'Display config for the embeddable `<fish-agent>` widget.
+
+
+                  Served without authentication for public agents; HTML attributes on the
+
+                  embed tag override every field. Grows alongside the Builder widget tab
+
+                  (greeting, policy switches, styles) — additions only, never renames.'
+                properties:
+                  agent_name:
+                    title: Agent Name
+                    type: string
+                required:
+                - agent_name
+                type: object
+        '403':
+          description: Request forbidden -- authorization will not help
+          headers: {}
+          content:
+            application/json:
+              schema:
+                properties:
+                  status:
+                    title: Status
+                    type: integer
+                  message:
+                    title: Message
+                    type: string
+                  reason:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    title: Reason
+                required:
+                - status
+                - message
+                type: object
+        '404':
+          description: Nothing matches the given URI
+          headers: {}
+          content:
+            application/json:
+              schema:
+                properties:
+                  status:
+                    title: Status
+                    type: integer
+                  message:
+                    title: Message
+                    type: string
+                  reason:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    title: Reason
+                required:
+                - status
+                - message
+                type: object
+      tags:
+      - Agents
+      operationId: getV1AgentAgentsByAgentIdWidget
+      x-operation-id-source: derived
+  /v1/agent/agents/{agent_id}/config:
+    get:
+      summary: Get Draft Config
+      description: 'Read the agent''s current draft configuration — the state the next publish
+
+        will freeze. Sessions run the latest published version, not the draft; use
+
+        the versions endpoints to see what is live. Webhook signing secrets are
+
+        write-only and reported as `has_secret`.'
+      security:
+      - BearerAuth: []
+      parameters:
+      - in: path
+        name: agent_id
+        description: ''
+        required: true
+        schema:
+          title: Agent Id
+          type: string
+        deprecated: false
+      responses:
+        '200':
+          description: Request fulfilled, document follows
+          headers: {}
+          content:
+            application/json:
+              schema:
+                properties:
+                  agent_id:
+                    title: Agent Id
+                    type: string
+                  config_hash:
+                    description: Content hash of the draft; equal to a version's config_hash when the draft has no unpublished changes.
+                    title: Config Hash
+                    type: string
+                  prompt:
+                    $ref: '#/components/schemas/AgentPromptConfig'
+                  voice:
+                    $ref: '#/components/schemas/AgentVoiceConfigView'
+                  asr:
+                    $ref: '#/components/schemas/PublicAgentAsrConfig'
+                  conversation:
+                    $ref: '#/components/schemas/AgentConversationConfig'
+                  tools:
+                    $ref: '#/components/schemas/PublicAgentToolsConfig'
+                  webhooks:
+                    $ref: '#/components/schemas/PublicAgentWebhooksConfig'
+                  knowledge_base:
+                    $ref: '#/components/schemas/PublicAgentKnowledgeBaseConfig'
+                  analysis:
+                    $ref: '#/components/schemas/AgentAnalysisConfig'
+                  guardrails:
+                    $ref: '#/components/schemas/AgentGuardrailsConfig'
+                  llm:
+                    $ref: '#/components/schemas/AgentLLMConfigRedacted'
+                  variables:
+                    $ref: '#/components/schemas/AgentVariablesConfig'
+                  updated_at:
+                    format: date-time
+                    title: Updated At
+                    type: string
+                required:
+                - agent_id
+                - config_hash
+                - prompt
+                - voice
+                - asr
+                - conversation
+                - tools
+                - webhooks
+                - knowledge_base
+                - analysis
+                - guardrails
+                - llm
+                - updated_at
+                type: object
+        '401':
+          description: No permission -- see authorization schemes
+          headers: {}
+          content:
+            application/json:
+              schema:
+                properties:
+                  status:
+                    title: Status
+                    type: integer
+                  message:
+                    title: Message
+                    type: string
+                  reason:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    title: Reason
+                required:
+                - status
+                - message
+                type: object
+        '404':
+          description: Nothing matches the given URI
+          headers: {}
+          content:
+            application/json:
+              schema:
+                properties:
+                  status:
+                    title: Status
+                    type: integer
+                  message:
+                    title: Message
+                    type: string
+                  reason:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    title: Reason
+                required:
+                - status
+                - message
+                type: object
+        '503':
+          description: The server cannot process the request due to a high load
+          headers: {}
+          content:
+            application/json:
+              schema:
+                properties:
+                  status:
+                    title: Status
+                    type: integer
+                  message:
+                    title: Message
+                    type: string
+                  reason:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    title: Reason
+                required:
+                - status
+                - message
+                type: object
+      tags:
+      - Agents
+      operationId: getV1AgentAgentsByAgentIdConfig
+      x-operation-id-source: derived
+    patch:
+      summary: Update Draft Config
+      description: 'Patch the draft configuration section by section; omitted sections keep
+
+        their value. Changes only affect live sessions after the next publish.
+
+        `prompt.system_prompt` is limited to 32000 tokens (422 beyond); keeping it
+
+        under 2000 tokens is recommended for latency and cost.
+
+        `voice.voice_id` accepts any public voice model id.
+
+        `voice.speaking_language` accepts any of the 52 supported ISO 639-1 codes
+
+        (the same set the console offers, see the Voice & language docs); anything else is 422. `voice.expressive` (default `true`) enables richer
+
+        expressive delivery (emotion steering, laughter and sounds, pauses); off
+
+        keeps the standard delivery. The `asr` section configures speech
+
+        recognition. `asr.model` picks the model: `deepgram:nova-3` (default),
+
+        `elevenlabs:scribe_v2_realtime`, `elevenlabs:scribe_v2_medical`, or
+
+        `fish_audio:transcribe-1-pro-realtime` (Fish realtime recognition, which
+
+        also decides end of turn and whether the caller is interrupting; in
+
+        preview, switching an agent onto it is 403 unless your team has access).
+
+        `asr.multilingual` (default `false`) lets recognition follow callers who
+
+        switch language mid-call, off tells the recognizer to expect
+
+        `voice.speaking_language` (models other than `deepgram:nova-3` may still
+
+        transcribe clear speech in another language). `asr.strict_language`
+
+        (default `false`) enforces `voice.speaking_language` whatever
+
+        `asr.multilingual` says: speech recognized as another language reaches the
+
+        agent as `[unintelligible speech]`. Language is detected per utterance, so
+
+        a short or heavily accented phrase in the speaking language can
+
+        occasionally be detected as another language and replaced too. Only
+
+        enable it when you explicitly need to stop the agent from understanding
+
+        other languages.
+
+        `asr.keyterms` is a recognition
+
+        vocabulary of up to 50 plain terms (brand names, product terms, personal
+
+        names), each at most 100 characters with no commas or semicolons. `[]`
+
+        clears it and 20-50 focused terms work best. `tool_ids` and
+
+        `knowledge_source_ids` replace their attachment lists wholesale and every
+
+        id must resolve, else 422. `llm.custom` points the agent at your own
+
+        OpenAI-compatible endpoint; mutually exclusive with `llm.model`, cleared
+
+        with an explicit null.'
+      security:
+      - BearerAuth: []
+      parameters:
+      - in: path
+        name: agent_id
+        description: ''
+        required: true
+        schema:
+          title: Agent Id
+          type: string
+        deprecated: false
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PublicAgentConfigPatchPayload'
+      responses:
+        '200':
+          description: Request fulfilled, document follows
+          headers: {}
+          content:
+            application/json:
+              schema:
+                properties:
+                  agent_id:
+                    title: Agent Id
+                    type: string
+                  config_hash:
+                    description: Content hash of the draft; equal to a version's config_hash when the draft has no unpublished changes.
+                    title: Config Hash
+                    type: string
+                  prompt:
+                    $ref: '#/components/schemas/AgentPromptConfig'
+                  voice:
+                    $ref: '#/components/schemas/AgentVoiceConfigView'
+                  asr:
+                    $ref: '#/components/schemas/PublicAgentAsrConfig'
+                  conversation:
+                    $ref: '#/components/schemas/AgentConversationConfig'
+                  tools:
+                    $ref: '#/components/schemas/PublicAgentToolsConfig'
+                  webhooks:
+                    $ref: '#/components/schemas/PublicAgentWebhooksConfig'
+                  knowledge_base:
+                    $ref: '#/components/schemas/PublicAgentKnowledgeBaseConfig'
+                  analysis:
+                    $ref: '#/components/schemas/AgentAnalysisConfig'
+                  guardrails:
+                    $ref: '#/components/schemas/AgentGuardrailsConfig'
+                  llm:
+                    $ref: '#/components/schemas/AgentLLMConfigRedacted'
+                  variables:
+                    $ref: '#/components/schemas/AgentVariablesConfig'
+                  updated_at:
+                    format: date-time
+                    title: Updated At
+                    type: string
+                required:
+                - agent_id
+                - config_hash
+                - prompt
+                - voice
+                - asr
+                - conversation
+                - tools
+                - webhooks
+                - knowledge_base
+                - analysis
+                - guardrails
+                - llm
+                - updated_at
+                type: object
+        '401':
+          description: No permission -- see authorization schemes
+          headers: {}
+          content:
+            application/json:
+              schema:
+                properties:
+                  status:
+                    title: Status
+                    type: integer
+                  message:
+                    title: Message
+                    type: string
+                  reason:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    title: Reason
+                required:
+                - status
+                - message
+                type: object
+        '403':
+          description: Request forbidden -- authorization will not help
+          headers: {}
+          content:
+            application/json:
+              schema:
+                properties:
+                  status:
+                    title: Status
+                    type: integer
+                  message:
+                    title: Message
+                    type: string
+                  reason:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    title: Reason
+                required:
+                - status
+                - message
+                type: object
+        '404':
+          description: Nothing matches the given URI
+          headers: {}
+          content:
+            application/json:
+              schema:
+                properties:
+                  status:
+                    title: Status
+                    type: integer
+                  message:
+                    title: Message
+                    type: string
+                  reason:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    title: Reason
+                required:
+                - status
+                - message
+                type: object
+        '409':
+          description: Request conflict
+          headers: {}
+          content:
+            application/json:
+              schema:
+                properties:
+                  status:
+                    title: Status
+                    type: integer
+                  message:
+                    title: Message
+                    type: string
+                  reason:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    title: Reason
+                required:
+                - status
+                - message
+                type: object
+        '422':
+          description: ''
+          headers: {}
+          content:
+            application/json:
+              schema:
+                properties:
+                  status:
+                    title: Status
+                    type: integer
+                  message:
+                    title: Message
+                    type: string
+                  reason:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    title: Reason
+                required:
+                - status
+                - message
+                type: object
+        '503':
+          description: The server cannot process the request due to a high load
+          headers: {}
+          content:
+            application/json:
+              schema:
+                properties:
+                  status:
+                    title: Status
+                    type: integer
+                  message:
+                    title: Message
+                    type: string
+                  reason:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    title: Reason
+                required:
+                - status
+                - message
+                type: object
+      tags:
+      - Agents
+      x-codeSamples:
+      - lang: bash
+        label: Update Draft Config
+        source: "curl --request PATCH \\\n  --url https://api.fish.audio/v1/agent/agents/<agent-id>/config \\\n  --header 'Authorization: Bearer <token>' \\\n  --header 'Content-Type: application/json' \\\n  --data '{\n    \"prompt\": {\n      \"system_prompt\": \"You are the receptionist for Fish Dental.\"\n    },\n    \"webhooks\": {\n      \"post_call\": [\n        {\n          \"url\": \"https://example.com/hooks/fish\",\n          \"secret\": \"<signing-secret>\"\n        }\n      ]\n    }\n  }'"
+      operationId: patchV1AgentAgentsByAgentIdConfig
+      x-operation-id-source: derived
+  /v1/agent/agents/{agent_id}/publish:
+    post:
+      summary: Publish Agent
+      description: 'Freeze the current draft into an immutable version (version_number
+
+        auto-increments) and make it the live configuration for new sessions. If
+
+        the draft already matches the live version, return that version unchanged.
+
+        The body is optional; the title and description label a newly created
+
+        version for audit and rollback.'
+      security:
+      - BearerAuth: []
+      parameters:
+      - in: path
+        name: agent_id
+        description: ''
+        required: true
+        schema:
+          title: Agent Id
+          type: string
+        deprecated: false
+      responses:
+        '200':
+          description: Request fulfilled, document follows
+          headers: {}
+          content:
+            application/json:
+              schema:
+                properties:
+                  version_number:
+                    title: Version Number
+                    type: integer
+                  version_title:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    title: Version Title
+                  version_description:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    title: Version Description
+                  config_hash:
+                    title: Config Hash
+                    type: string
+                  published_at:
+                    format: date-time
+                    title: Published At
+                    type: string
+                required:
+                - version_number
+                - config_hash
+                - published_at
+                type: object
+        '401':
+          description: No permission -- see authorization schemes
+          headers: {}
+          content:
+            application/json:
+              schema:
+                properties:
+                  status:
+                    title: Status
+                    type: integer
+                  message:
+                    title: Message
+                    type: string
+                  reason:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    title: Reason
+                required:
+                - status
+                - message
+                type: object
+        '404':
+          description: Nothing matches the given URI
+          headers: {}
+          content:
+            application/json:
+              schema:
+                properties:
+                  status:
+                    title: Status
+                    type: integer
+                  message:
+                    title: Message
+                    type: string
+                  reason:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    title: Reason
+                required:
+                - status
+                - message
+                type: object
+        '409':
+          description: Request conflict
+          headers: {}
+          content:
+            application/json:
+              schema:
+                properties:
+                  status:
+                    title: Status
+                    type: integer
+                  message:
+                    title: Message
+                    type: string
+                  reason:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    title: Reason
+                required:
+                - status
+                - message
+                type: object
+        '422':
+          description: ''
+          headers: {}
+          content:
+            application/json:
+              schema:
+                properties:
+                  status:
+                    title: Status
+                    type: integer
+                  message:
+                    title: Message
+                    type: string
+                  reason:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    title: Reason
+                required:
+                - status
+                - message
+                type: object
+        '503':
+          description: The server cannot process the request due to a high load
+          headers: {}
+          content:
+            application/json:
+              schema:
+                properties:
+                  status:
+                    title: Status
+                    type: integer
+                  message:
+                    title: Message
+                    type: string
+                  reason:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    title: Reason
+                required:
+                - status
+                - message
+                type: object
+      tags:
+      - Agents
+      x-codeSamples:
+      - lang: bash
+        label: Publish
+        source: "curl --request POST \\\n  --url https://api.fish.audio/v1/agent/agents/<agent-id>/publish \\\n  --header 'Authorization: Bearer <token>' \\\n  --header 'Content-Type: application/json' \\\n  --data '{\n    \"version_title\": \"Tighter greeting\"\n  }'"
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties:
+                version_title:
+                  type: string
+                  maxLength: 120
+                  description: Optional label shown in the version history.
+                version_description:
+                  type: string
+                  maxLength: 2000
+                  description: Optional longer note for audit and rollback context.
+      operationId: postV1AgentAgentsByAgentIdPublish
+      x-operation-id-source: derived
+  /v1/agent/agents/{agent_id}/versions:
+    get:
+      summary: List Agent Versions
+      description: 'The publish history, newest first. The highest version_number is what live
+
+        sessions run. Compare a version''s config_hash with the draft''s to detect
+
+        unpublished changes.'
+      security:
+      - BearerAuth: []
+      parameters:
+      - in: path
+        name: agent_id
+        description: ''
+        required: true
+        schema:
+          title: Agent Id
+          type: string
+        deprecated: false
+      - in: query
+        name: cursor
+        description: ''
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          default: null
+          title: Cursor
+        deprecated: false
+      - in: query
+        name: page
+        description: 1-based page number; mutually exclusive with cursor.
+        required: false
+        schema:
+          anyOf:
+          - minimum: 1
+            type: integer
+          - type: 'null'
+          default: null
+          title: Page
+        deprecated: false
+      - in: query
+        name: include_total
+        description: ''
+        required: false
+        schema:
+          default: false
+          title: Include Total
+          type: boolean
+        deprecated: false
+      - in: query
+        name: page_size
+        description: ''
+        required: false
+        schema:
+          default: 30
+          maximum: 100
+          minimum: 1
+          title: Page Size
+          type: integer
+        deprecated: false
+      responses:
+        '200':
+          description: Request fulfilled, document follows
+          headers: {}
+          content:
+            application/json:
+              schema:
+                properties:
+                  versions:
+                    items:
+                      $ref: '#/components/schemas/PublicAgentVersionSummary'
+                    title: Versions
+                    type: array
+                  has_more:
+                    title: Has More
+                    type: boolean
+                  next_cursor:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    title: Next Cursor
+                  total:
+                    anyOf:
+                    - type: integer
+                    - type: 'null'
+                    default: null
+                    title: Total
+                required:
+                - versions
+                - has_more
+                type: object
+        '400':
+          description: Bad request syntax or unsupported method
+          headers: {}
+          content:
+            application/json:
+              schema:
+                properties:
+                  status:
+                    title: Status
+                    type: integer
+                  message:
+                    title: Message
+                    type: string
+                  reason:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    title: Reason
+                required:
+                - status
+                - message
+                type: object
+        '401':
+          description: No permission -- see authorization schemes
+          headers: {}
+          content:
+            application/json:
+              schema:
+                properties:
+                  status:
+                    title: Status
+                    type: integer
+                  message:
+                    title: Message
+                    type: string
+                  reason:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    title: Reason
+                required:
+                - status
+                - message
+                type: object
+        '404':
+          description: Nothing matches the given URI
+          headers: {}
+          content:
+            application/json:
+              schema:
+                properties:
+                  status:
+                    title: Status
+                    type: integer
+                  message:
+                    title: Message
+                    type: string
+                  reason:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    title: Reason
+                required:
+                - status
+                - message
+                type: object
+        '503':
+          description: The server cannot process the request due to a high load
+          headers: {}
+          content:
+            application/json:
+              schema:
+                properties:
+                  status:
+                    title: Status
+                    type: integer
+                  message:
+                    title: Message
+                    type: string
+                  reason:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    title: Reason
+                required:
+                - status
+                - message
+                type: object
+      tags:
+      - Agents
+      operationId: getV1AgentAgentsByAgentIdVersions
+      x-operation-id-source: derived
+  /v1/agent/agents/{agent_id}/versions/{version_number}:
+    get:
+      summary: Get Agent Version
+      description: 'One published version with its full frozen configuration snapshot —
+
+        including the current live version. Secrets inside the snapshot are
+
+        redacted the same way as the draft config.'
+      security:
+      - BearerAuth: []
+      parameters:
+      - in: path
+        name: agent_id
+        description: ''
+        required: true
+        schema:
+          title: Agent Id
+          type: string
+        deprecated: false
+      - in: path
+        name: version_number
+        description: ''
+        required: true
+        schema:
+          title: Version Number
+          type: integer
+        deprecated: false
+      responses:
+        '200':
+          description: Request fulfilled, document follows
+          headers: {}
+          content:
+            application/json:
+              schema:
+                properties:
+                  version_number:
+                    title: Version Number
+                    type: integer
+                  version_title:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    title: Version Title
+                  version_description:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    title: Version Description
+                  config_hash:
+                    title: Config Hash
+                    type: string
+                  published_at:
+                    format: date-time
+                    title: Published At
+                    type: string
+                  config:
+                    $ref: '#/components/schemas/PublicAgentConfigEntity'
+                    description: The immutable configuration snapshot this version pinned at publish time.
+                required:
+                - version_number
+                - config_hash
+                - published_at
+                - config
+                type: object
+        '401':
+          description: No permission -- see authorization schemes
+          headers: {}
+          content:
+            application/json:
+              schema:
+                properties:
+                  status:
+                    title: Status
+                    type: integer
+                  message:
+                    title: Message
+                    type: string
+                  reason:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    title: Reason
+                required:
+                - status
+                - message
+                type: object
+        '404':
+          description: Nothing matches the given URI
+          headers: {}
+          content:
+            application/json:
+              schema:
+                properties:
+                  status:
+                    title: Status
+                    type: integer
+                  message:
+                    title: Message
+                    type: string
+                  reason:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    title: Reason
+                required:
+                - status
+                - message
+                type: object
+        '503':
+          description: The server cannot process the request due to a high load
+          headers: {}
+          content:
+            application/json:
+              schema:
+                properties:
+                  status:
+                    title: Status
+                    type: integer
+                  message:
+                    title: Message
+                    type: string
+                  reason:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    title: Reason
+                required:
+                - status
+                - message
+                type: object
+      tags:
+      - Agents
+      operationId: getV1AgentAgentsByAgentIdVersionsByVersionNumber
+      x-operation-id-source: derived
+components:
+  schemas:
+    PublicPostCallWebhook:
+      properties:
+        url:
+          title: Url
+          type: string
+        has_secret:
+          default: false
+          description: Whether a signing secret is configured; the value itself is never returned.
+          title: Has Secret
+          type: boolean
+      required:
+      - url
+      title: PublicPostCallWebhook
+      type: object
+    AgentKeypadMenu:
+      description: 'Keypad menu for inbound phone calls. Before the agent''s first turn it
+
+        speaks `prompt` in the agent''s voice, collects one key press (or, with
+
+        `accept_speech`, the option''s value said aloud) and stores the chosen
+
+        option''s `value` in the dynamic variable named by `variable`. The system
+
+        prompt, first message, transfer texts, farewell and webhook tools can use
+
+        `{{variable}}` to act on the choice. Outbound calls, web, API and test
+
+        sessions skip the menu, and the variable renders from its default.'
+      properties:
+        enabled:
+          default: false
+          title: Enabled
+          type: boolean
+        prompt:
+          default: ''
+          title: Prompt
+          type: string
+        options:
+          default: []
+          items:
+            $ref: '#/components/schemas/AgentKeypadMenuOption'
+          title: Options
+          type: array
+        accept_speech:
+          default: true
+          title: Accept Speech
+          type: boolean
+        variable:
+          default: menu_choice
+          title: Variable
+          type: string
+        no_input_timeout_seconds:
+          default: 5
+          title: No Input Timeout Seconds
+          type: integer
+        max_attempts:
+          default: 2
+          title: Max Attempts
+          type: integer
+        retry_message:
+          default: ''
+          title: Retry Message
+          type: string
+        fallback_value:
+          default: ''
+          title: Fallback Value
+          type: string
+      title: AgentKeypadMenu
+      type: object
+    PublicAgentLLMPatch:
+      additionalProperties: false
+      properties:
+        model:
+          anyOf:
+          - enum:
+            - google/gemini-3.5-flash-lite
+            - google/gemini-3.6-flash
+            - google/gemini-3.8-flash
+            - google/gemini-2.5-flash
+            - google/gemma-4-26b-a4b-it
+            - anthropic/claude-haiku-4.5
+            - anthropic/claude-sonnet-4.6
+            - anthropic/claude-opus-5.5
+            - anthropic/claude-fable-5.1
+            - openai/gpt-5.6-luna
+            - openai/gpt-6-luna
+            - openai/gpt-5
+            - openai/gpt-6.1-sol
+            - openai/gpt-6-astra
+            - openai/gpt-4o
+            - openai/gpt-4.1
+            type: string
+          - type: 'null'
+          default: null
+          title: Model
+        custom:
+          anyOf:
+          - $ref: '#/components/schemas/PublicAgentLLMCustomConfig'
+          - type: 'null'
+          default: null
+          description: Your own OpenAI-compatible endpoint; mutually exclusive with `model`, explicit null reverts to the platform model.
+      title: PublicAgentLLMPatch
+      type: object
+    AgentVoiceConfigView:
+      description: 'Read shape of the voice section. The ASR fields that moved to the asr
+
+        section stay mirrored here, deprecated, so clients written before the split
+
+        keep reading them.'
+      properties:
+        voice_id:
+          default: b347db033a6549378b48d00acb0d06cd
+          title: Voice Id
+          type: string
+        speaking_language:
+          default: en
+          enum:
+          - en
+          - ja
+          - zh
+          - ko
+          - es
+          - fr
+          - de
+          - pt
+          - it
+          - nl
+          - ar
+          - hi
+          - id
+          - tr
+          - ru
+          - bg
+          - sr
+          - hr
+          - cs
+          - sk
+          - pl
+          - uk
+          - ro
+          - hu
+          - el
+          - sv
+          - da
+          - 'no'
+          - fi
+          - et
+          - lv
+          - lt
+          - ca
+          - he
+          - fa
+          - ur
+          - kk
+          - ka
+          - hy
+          - bn
+          - ta
+          - te
+          - kn
+          - mr
+          - gu
+          - pa
+          - ne
+          - th
+          - vi
+          - ms
+          - tl
+          - af
+          title: Speaking Language
+          type: string
+        expressive:
+          default: false
+          title: Expressive
+          type: boolean
+        speed:
+          default: 1.0
+          maximum: 2.0
+          minimum: 0.5
+          title: Speed
+          type: number
+        tts_model:
+          default: s2.1-pro
+          enum:
+          - s2.1-pro
+          - drama-3
+          title: Tts Model
+          type: string
+        pronunciation_dictionary_ids:
+          items:
+            type: string
+          title: Pronunciation Dictionary Ids
+          type: array
+      title: AgentVoiceConfigView
+      type: object
+    AgentTransferDestination:
+      properties:
+        type:
+          default: phone
+          enum:
+          - phone
+          - sip
+          title: Type
+          type: string
+        label:
+          default: ''
+          title: Label
+          type: string
+        phone_number:
+          anyOf:
+          - type: string
+          - type: 'null'
+          default: null
+          title: Phone Number
+        sip_uri:
+          anyOf:
+          - type: string
+          - type: 'null'
+          default: null
+          title: Sip Uri
+        description:
+          default: ''
+          title: Description
+          type: string
+        mode:
+          default: cold
+          enum:
+          - cold
+          - warm
+          title: Mode
+          type: string
+        warm_connect:
+          default: confirm
+          enum:
+          - confirm
+          - briefing
+          - direct
+          title: Warm Connect
+          type: string
+        warm_briefing_instructions:
+          default: ''
+          title: Warm Briefing Instructions
+          type: string
+        warm_ring_timeout_seconds:
+          default: 30
+          title: Warm Ring Timeout Seconds
+          type: integer
+        warm_confirm_timeout_seconds:
+          default: 60
+          title: Warm Confirm Timeout Seconds
+          type: integer
+        warm_human_detection:
+          default: false
+          description: Applies to warm transfers whose warm_connect is `confirm` or `briefing`, and is ignored for cold transfers and `direct`. When true, once the destination answers, the agent stays silent until the other side speaks, then classifies the pickup. A person is briefed as usual. Voicemail or an IVR (phone menu) ends the transfer as failed. A hold queue or silence keeps the agent waiting until `warm_confirm_timeout_seconds` ends the attempt as unreachable. A failed transfer follows `on_failure`. Leave it off for destinations whose people are only reachable through a phone menu, because the menu stops the transfer.
+          title: Warm Human Detection
+          type: boolean
+        on_failure:
+          $ref: '#/components/schemas/AgentTransferOnFailure'
+        announcement_mode:
+          default: generated
+          enum:
+          - generated
+          - fixed
+          - 'off'
+          title: Announcement Mode
+          type: string
+        announcement_message:
+          default: ''
+          title: Announcement Message
+          type: string
+      title: AgentTransferDestination
+      type: object
+    AgentEchoGuard:
+      description: 'Echo guard per call channel: true on, false off, null uses the default.'
+      properties:
+        web_voice:
+          anyOf:
+          - type: boolean
+          - type: 'null'
+          default: null
+          description: Voice calls in a browser or app (web widget, SDK, test calls). Null uses the default (on).
+          title: Web Voice
+        phone_inbound:
+          anyOf:
+          - type: boolean
+          - type: 'null'
+          default: null
+          description: Inbound phone calls. Null uses the default (on).
+          title: Phone Inbound
+        phone_outbound:
+          anyOf:
+          - type: boolean
+          - type: 'null'
+          default: null
+          description: Outbound phone calls. Null uses the default (off).
+          title: Phone Outbound
+      title: AgentEchoGuard
+      type: object
+    PublicAgentAsrConfig:
+      description: 'The asr section as the public API reads it: without the console-only
+
+        noise cancellation and speaker label switches.'
+      properties:
+        model:
+          default: deepgram:nova-3
+          enum:
+          - deepgram:nova-3
+          - elevenlabs:scribe_v2_realtime
+          - elevenlabs:scribe_v2_medical
+          - fish_audio:transcribe-1-pro-realtime
+          title: Model
+          type: string
+        multilingual:
+          default: false
+          title: Multilingual
+          type: boolean
+        strict_language:
+          default: false
+          description: 'Enforces voice.speaking_language whatever multilingual says: speech recognized as another language reaches the agent as [unintelligible speech]. Language is detected per utterance, so a short or heavily accented phrase in the speaking language can occasionally be detected as another language and replaced too. With deepgram:nova-3, speech in another language is usually not transcribed at all. Only enable it when you explicitly need to stop the agent from understanding other languages.'
+          title: Strict Language
+          type: boolean
+        keyterms:
+          items:
+            type: string
+          maxItems: 50
+          title: Keyterms
+          type: array
+      title: PublicAgentAsrConfig
+      type: object
+    AgentOutboundConfig:
+      description: 'Deprecated (2026-09-07): kept for compatibility only. `amd_enabled` and
+
+        `voicemail` no longer change call behavior; outbound calls greet as soon as
+
+        the callee answers, and `answered_by` is always `unknown`.'
+      properties:
+        amd_enabled:
+          default: true
+          title: Amd Enabled
+          type: boolean
+        voicemail:
+          anyOf:
+          - $ref: '#/components/schemas/AgentOutboundVoicemailConfig'
+          - type: 'null'
+          default: null
+      title: AgentOutboundConfig
+      type: object
+    PublicPostCallWebhookPayload:
+      additionalProperties: false
+      properties:
+        url:
+          maxLength: 4000
+          minLength: 1
+          title: Url
+          type: string
+        secret:
+          anyOf:
+          - maxLength: 256
+            type: string
+          - type: 'null'
+          default: null
+          description: 'Optional HMAC-SHA256 signing secret (X-Fish-Webhook-Signature). Write-only: reads report `has_secret` instead of the value. Omit it (or send null) to keep the secret already stored for the same url; send an empty string to remove it.'
+          title: Secret
+      required:
+      - url
+      title: PublicPostCallWebhookPayload
+      type: object
+    PublicSystemToolsPatch:
+      additionalProperties: false
+      properties:
+        hang_up_call:
+          anyOf:
+          - type: boolean
+          - type: 'null'
+          default: null
+          title: Hang Up Call
+        hang_up_call_farewell_mode:
+          anyOf:
+          - enum:
+            - generated
+            - fixed
+            - 'off'
+            type: string
+          - type: 'null'
+          default: null
+          title: Hang Up Call Farewell Mode
+        hang_up_call_farewell_message:
+          anyOf:
+          - maxLength: 1000
+            type: string
+          - type: 'null'
+          default: null
+          title: Hang Up Call Farewell Message
+        hang_up_call_refuse_questions:
+          anyOf:
+          - type: boolean
+          - type: 'null'
+          default: null
+          title: Hang Up Call Refuse Questions
+      title: PublicSystemToolsPatch
+      type: object
+    AgentPromptConfig:
+      properties:
+        system_prompt:
+          default: ''
+          title: System Prompt
+          type: string
+        first_message_mode:
+          default: prompt
+          enum:
+          - 'off'
+          - fixed
+          - prompt
+          title: First Message Mode
+          type: string
+        first_message:
+          default: Hi! Thanks for calling — how can I help you today?
+          title: First Message
+          type: string
+        first_message_prompt:
+          default: Greet the caller and ask what you can help with.
+          title: First Message Prompt
+          type: string
+      title: AgentPromptConfig
+      type: object
+    AgentOutboundVoicemailPatch:
+      additionalProperties: false
+      properties:
+        action:
+          default: hangup
+          enum:
+          - hangup
+          - leave_message
+          - leave_prompt_message
+          title: Action
+          type: string
+        message:
+          default: ''
+          maxLength: 10000
+          title: Message
+          type: string
+      title: AgentOutboundVoicemailPatch
+      type: object
+    PublicAgentVariablesPatch:
+      additionalProperties: false
+      properties:
+        defaults:
+          anyOf:
+          - additionalProperties:
+              anyOf:
+              - type: string
+              - type: integer
+              - type: number
+              - type: boolean
+            type: object
+          - type: 'null'
+          default: null
+          title: Defaults
+        on_missing:
+          anyOf:
+          - enum:
+            - keep
+            - empty
+            - reject
+            type: string
+          - type: 'null'
+          default: null
+          title: On Missing
+      title: PublicAgentVariablesPatch
+      type: object
+    AgentKeypadInputPatch:
+      additionalProperties: false
+      properties:
+        enabled:
+          default: false
+          title: Enabled
+          type: boolean
+        terminator:
+          default: '#'
+          enum:
+          - '#'
+          - '*'
+          - none
+          title: Terminator
+          type: string
+        inter_digit_timeout_seconds:
+          default: 2
+          maximum: 10
+          minimum: 1
+          title: Inter Digit Timeout Seconds
+          type: integer
+      title: AgentKeypadInputPatch
+      type: object
+    AgentKeypadMenuOption:
+      properties:
+        key:
+          default: ''
+          title: Key
+          type: string
+        value:
+          default: ''
+          title: Value
+          type: string
+      title: AgentKeypadMenuOption
+      type: object
+    AgentTransferOnFailurePatch:
+      additionalProperties: false
+      properties:
+        action:
+          default: return_to_agent
+          enum:
+          - return_to_agent
+          - end_call
+          title: Action
+          type: string
+        message:
+          default: ''
+          title: Message
+          type: string
+      title: AgentTransferOnFailurePatch
+      type: object
+    AgentLLMConfigRedacted:
+      properties:
+        model:
+          default: google/gemini-3.6-flash
+          enum:
+          - google/gemini-3.5-flash-lite
+          - google/gemini-3.6-flash
+          - google/gemini-3.8-flash
+          - google/gemini-2.5-flash
+          - google/gemma-4-26b-a4b-it
+          - anthropic/claude-haiku-4.5
+          - anthropic/claude-sonnet-4.6
+          - anthropic/claude-opus-5.5
+          - anthropic/claude-fable-5.1
+          - openai/gpt-5.6-luna
+          - openai/gpt-6-luna
+          - openai/gpt-5
+          - openai/gpt-6.1-sol
+          - openai/gpt-6-astra
+          - openai/gpt-4o
+          - openai/gpt-4.1
+          title: Model
+          type: string
+        custom:
+          anyOf:
+          - $ref: '#/components/schemas/AgentLLMCustomConfigRedacted'
+          - type: 'null'
+          default: null
+      title: AgentLLMConfigRedacted
+      type: object
+    PublicAgentConfigEntity:
+      properties:
+        agent_id:
+          title: Agent Id
+          type: string
+        config_hash:
+          description: Content hash of the draft; equal to a version's config_hash when the draft has no unpublished changes.
+          title: Config Hash
+          type: string
+        prompt:
+          $ref: '#/components/schemas/AgentPromptConfig'
+        voice:
+          $ref: '#/components/schemas/AgentVoiceConfigView'
+        asr:
+          $ref: '#/components/schemas/PublicAgentAsrConfig'
+        conversation:
+          $ref: '#/components/schemas/AgentConversationConfig'
+        tools:
+          $ref: '#/components/schemas/PublicAgentToolsConfig'
+        webhooks:
+          $ref: '#/components/schemas/PublicAgentWebhooksConfig'
+        knowledge_base:
+          $ref: '#/components/schemas/PublicAgentKnowledgeBaseConfig'
+        analysis:
+          $ref: '#/components/schemas/AgentAnalysisConfig'
+        guardrails:
+          $ref: '#/components/schemas/AgentGuardrailsConfig'
+        llm:
+          $ref: '#/components/schemas/AgentLLMConfigRedacted'
+        variables:
+          $ref: '#/components/schemas/AgentVariablesConfig'
+        updated_at:
+          format: date-time
+          title: Updated At
+          type: string
+      required:
+      - agent_id
+      - config_hash
+      - prompt
+      - voice
+      - asr
+      - conversation
+      - tools
+      - webhooks
+      - knowledge_base
+      - analysis
+      - guardrails
+      - llm
+      - updated_at
+      title: PublicAgentConfigEntity
+      type: object
+    PublicAgentConfigPatchPayload:
+      additionalProperties: false
+      properties:
+        prompt:
+          anyOf:
+          - $ref: '#/components/schemas/PublicAgentPromptPatch'
+          - type: 'null'
+          default: null
+        voice:
+          anyOf:
+          - $ref: '#/components/schemas/PublicAgentVoicePatch'
+          - type: 'null'
+          default: null
+        asr:
+          anyOf:
+          - $ref: '#/components/schemas/PublicAgentAsrPatch'
+          - type: 'null'
+          default: null
+        conversation:
+          anyOf:
+          - $ref: '#/components/schemas/PublicAgentConversationPatch'
+          - type: 'null'
+          default: null
+        tools:
+          anyOf:
+          - $ref: '#/components/schemas/PublicAgentToolsPatch'
+          - type: 'null'
+          default: null
+        webhooks:
+          anyOf:
+          - $ref: '#/components/schemas/PublicAgentWebhooksPatch'
+          - type: 'null'
+          default: null
+        knowledge_base:
+          anyOf:
+          - $ref: '#/components/schemas/PublicAgentKnowledgeBasePatch'
+          - type: 'null'
+          default: null
+        analysis:
+          anyOf:
+          - $ref: '#/components/schemas/PublicAgentAnalysisPatch'
+          - type: 'null'
+          default: null
+        guardrails:
+          anyOf:
+          - $ref: '#/components/schemas/PublicAgentGuardrailsPatch'
+          - type: 'null'
+          default: null
+        llm:
+          anyOf:
+          - $ref: '#/components/schemas/PublicAgentLLMPatch'
+          - type: 'null'
+          default: null
+        variables:
+          anyOf:
+          - $ref: '#/components/schemas/PublicAgentVariablesPatch'
+          - type: 'null'
+          default: null
+          description: 'Default values for the {{placeholders}} in the configured text, used when the session supplies none (the map replaces as a whole), and on_missing for a placeholder with neither: keep leaves it as written (default), empty renders it as empty text, reject refuses the session.'
+      title: PublicAgentConfigPatchPayload
+      type: object
+    AgentOutboundVoicemailConfig:
+      description: 'Deprecated (2026-09-07): answering-machine detection was removed from the
+
+        call runtime, so voicemail actions never fire. The node is still accepted
+
+        and stored so existing configs and API callers keep working; the worker
+
+        no longer receives it.'
+      properties:
+        action:
+          default: hangup
+          enum:
+          - hangup
+          - leave_message
+          - leave_prompt_message
+          title: Action
+          type: string
+        message:
+          default: ''
+          title: Message
+          type: string
+      title: AgentOutboundVoicemailConfig
+      type: object
+    AgentTransferOnFailure:
+      properties:
+        action:
+          default: return_to_agent
+          enum:
+          - return_to_agent
+          - end_call
+          title: Action
+          type: string
+        message:
+          default: ''
+          title: Message
+          type: string
+      title: AgentTransferOnFailure
+      type: object
+    PublicAgentAnalysisSummaryPatch:
+      additionalProperties: false
+      properties:
+        enabled:
+          default: true
+          title: Enabled
+          type: boolean
+        prompt:
+          anyOf:
+          - maxLength: 1000
+            type: string
+          - type: 'null'
+          default: null
+          title: Prompt
+        language:
+          default: en
+          enum:
+          - en
+          - ja
+          - zh
+          - ko
+          - es
+          - fr
+          - de
+          - pt
+          - it
+          - nl
+          - ar
+          - hi
+          - id
+          - tr
+          - ru
+          - bg
+          - sr
+          - hr
+          - cs
+          - sk
+          - pl
+          - uk
+          - ro
+          - hu
+          - el
+          - sv
+          - da
+          - 'no'
+          - fi
+          - et
+          - lv
+          - lt
+          - ca
+          - he
+          - fa
+          - ur
+          - kk
+          - ka
+          - hy
+          - bn
+          - ta
+          - te
+          - kn
+          - mr
+          - gu
+          - pa
+          - ne
+          - th
+          - vi
+          - ms
+          - tl
+          - af
+          title: Language
+          type: string
+      title: PublicAgentAnalysisSummaryPatch
+      type: object
+    PublicAgentLLMCustomConfig:
+      additionalProperties: false
+      properties:
+        base_url:
+          maxLength: 2000
+          minLength: 1
+          title: Base Url
+          type: string
+        model:
+          maxLength: 256
+          minLength: 1
+          title: Model
+          type: string
+        api_key:
+          anyOf:
+          - maxLength: 4096
+            minLength: 1
+            type: string
+          - type: 'null'
+          default: null
+          description: Sent to your endpoint as the Authorization bearer token; write-only, reads return null. Required when introducing `custom`; omit to keep the stored key when updating.
+          title: Api Key
+      required:
+      - base_url
+      - model
+      title: PublicAgentLLMCustomConfig
+      type: object
+    PublicAgentGuardrailsPatch:
+      additionalProperties: false
+      properties:
+        focus:
+          anyOf:
+          - type: boolean
+          - type: 'null'
+          default: null
+          title: Focus
+        manipulation:
+          anyOf:
+          - type: boolean
+          - type: 'null'
+          default: null
+          title: Manipulation
+      title: PublicAgentGuardrailsPatch
+      type: object
+    AgentKeypadInput:
+      description: 'Keypad input for phone calls: digits the caller types during the
+
+        conversation reach the agent as one user turn, ended by `terminator` or
+
+        by a pause of `inter_digit_timeout_seconds` (`none`: the pause only).'
+      properties:
+        enabled:
+          default: false
+          title: Enabled
+          type: boolean
+        terminator:
+          default: '#'
+          enum:
+          - '#'
+          - '*'
+          - none
+          title: Terminator
+          type: string
+        inter_digit_timeout_seconds:
+          default: 2
+          title: Inter Digit Timeout Seconds
+          type: integer
+      title: AgentKeypadInput
+      type: object
+    AgentVariablesConfig:
+      description: Defaults for `{{name}}` placeholders and what a placeholder without a value does.
+      properties:
+        defaults:
+          additionalProperties:
+            anyOf:
+            - type: string
+            - type: integer
+            - type: number
+            - type: boolean
+          title: Defaults
+          type: object
+        on_missing:
+          default: keep
+          enum:
+          - keep
+          - empty
+          - reject
+          title: On Missing
+          type: string
+      title: AgentVariablesConfig
+      type: object
+    PublicAgentToolsConfig:
+      properties:
+        enabled:
+          default: true
+          title: Enabled
+          type: boolean
+        tool_ids:
+          items:
+            type: string
+          title: Tool Ids
+          type: array
+        system_tools:
+          $ref: '#/components/schemas/AgentSystemToolsConfig'
+      title: PublicAgentToolsConfig
+      type: object
+    AgentAnalysisConfig:
+      properties:
+        summary:
+          $ref: '#/components/schemas/AgentAnalysisSummaryConfig'
+        data_fields:
+          items:
+            $ref: '#/components/schemas/AgentAnalysisDataField'
+          maxItems: 20
+          title: Data Fields
+          type: array
+        criteria:
+          items:
+            $ref: '#/components/schemas/AgentAnalysisCriterion'
+          maxItems: 10
+          title: Criteria
+          type: array
+      title: AgentAnalysisConfig
+      type: object
+    PublicAgentVersionSummary:
+      properties:
+        version_number:
+          title: Version Number
+          type: integer
+        version_title:
+          anyOf:
+          - type: string
+          - type: 'null'
+          default: null
+          title: Version Title
+        version_description:
+          anyOf:
+          - type: string
+          - type: 'null'
+          default: null
+          title: Version Description
+        config_hash:
+          title: Config Hash
+          type: string
+        published_at:
+          format: date-time
+          title: Published At
+          type: string
+      required:
+      - version_number
+      - config_hash
+      - published_at
+      title: PublicAgentVersionSummary
+      type: object
+    AgentKeypadMenuOptionPatch:
+      additionalProperties: false
+      properties:
+        key:
+          title: Key
+          type: string
+        value:
+          title: Value
+          type: string
+      required:
+      - key
+      - value
+      title: AgentKeypadMenuOptionPatch
+      type: object
+    PublicAgentVoicePatch:
+      additionalProperties: false
+      properties:
+        voice_id:
+          anyOf:
+          - maxLength: 256
+            type: string
+          - type: 'null'
+          default: null
+          title: Voice Id
+        speaking_language:
+          anyOf:
+          - enum:
+            - en
+            - ja
+            - zh
+            - ko
+            - es
+            - fr
+            - de
+            - pt
+            - it
+            - nl
+            - ar
+            - hi
+            - id
+            - tr
+            - ru
+            - bg
+            - sr
+            - hr
+            - cs
+            - sk
+            - pl
+            - uk
+            - ro
+            - hu
+            - el
+            - sv
+            - da
+            - 'no'
+            - fi
+            - et
+            - lv
+            - lt
+            - ca
+            - he
+            - fa
+            - ur
+            - kk
+            - ka
+            - hy
+            - bn
+            - ta
+            - te
+            - kn
+            - mr
+            - gu
+            - pa
+            - ne
+            - th
+            - vi
+            - ms
+            - tl
+            - af
+            type: string
+          - type: 'null'
+          default: null
+          title: Speaking Language
+        expressive:
+          anyOf:
+          - type: boolean
+          - type: 'null'
+          default: null
+          title: Expressive
+        speed:
+          anyOf:
+          - maximum: 2.0
+            minimum: 0.5
+            type: number
+          - type: 'null'
+          default: null
+          title: Speed
+        tts_model:
+          anyOf:
+          - enum:
+            - s2.1-pro
+            - drama-3
+            type: string
+          - type: 'null'
+          default: null
+          title: Tts Model
+        pronunciation_dictionary_ids:
+          anyOf:
+          - items:
+              type: string
+            maxItems: 3
+            type: array
+          - type: 'null'
+          default: null
+          title: Pronunciation Dictionary Ids
+      title: PublicAgentVoicePatch
+      type: object
+    PublicAgentEntity:
+      properties:
+        agent_id:
+          title: Agent Id
+          type: string
+        workspace_id:
+          title: Workspace Id
+          type: string
+        name:
+          title: Name
+          type: string
+        description:
+          default: ''
+          title: Description
+          type: string
+        status:
+          enum:
+          - active
+          - archived
+          title: Status
+          type: string
+        publication_state:
+          description: '`live` once at least one version is published; `draft` agents cannot take sessions yet.'
+          enum:
+          - live
+          - draft
+          title: Publication State
+          type: string
+        public_enabled:
+          default: false
+          title: Public Enabled
+          type: boolean
+        allowed_origins:
+          items:
+            type: string
+          title: Allowed Origins
+          type: array
+        overrides_allowed:
+          items:
+            enum:
+            - first_message
+            - system_prompt
+            - voice_id
+            - language
+            - asr.model
+            type: string
+          title: Overrides Allowed
+          type: array
+        created_at:
+          format: date-time
+          title: Created At
+          type: string
+        updated_at:
+          format: date-time
+          title: Updated At
+          type: string
+      required:
+      - agent_id
+      - workspace_id
+      - name
+      - status
+      - publication_state
+      - created_at
+      - updated_at
+      title: PublicAgentEntity
+      type: object
+    PublicAgentPromptPatch:
+      additionalProperties: false
+      properties:
+        system_prompt:
+          anyOf:
+          - maxLength: 500000
+            type: string
+          - type: 'null'
+          default: null
+          description: Limited to 32000 tokens (o200k_base); keeping it under 2000 tokens is recommended for latency and cost.
+          title: System Prompt
+        first_message_mode:
+          anyOf:
+          - enum:
+            - 'off'
+            - fixed
+            - prompt
+            type: string
+          - type: 'null'
+          default: null
+          title: First Message Mode
+        first_message:
+          anyOf:
+          - maxLength: 10000
+            type: string
+          - type: 'null'
+          default: null
+          title: First Message
+        first_message_prompt:
+          anyOf:
+          - maxLength: 10000
+            type: string
+          - type: 'null'
+          default: null
+          title: First Message Prompt
+      title: PublicAgentPromptPatch
+      type: object
+    AgentAnalysisDataField:
+      properties:
+        name:
+          pattern: ^[a-z][a-z0-9_]{0,63}$
+          title: Name
+          type: string
+        type:
+          default: text
+          enum:
+          - boolean
+          - text
+          - number
+          - enum
+          title: Type
+          type: string
+        description:
+          default: ''
+          maxLength: 500
+          title: Description
+          type: string
+        enum_options:
+          anyOf:
+          - items:
+              type: string
+            type: array
+          - type: 'null'
+          default: null
+          title: Enum Options
+      required:
+      - name
+      title: AgentAnalysisDataField
+      type: object
+    PublicAgentKnowledgeBasePatch:
+      additionalProperties: false
+      properties:
+        enabled:
+          anyOf:
+          - type: boolean
+          - type: 'null'
+          default: null
+          description: Whether the agent retrieves from its attached sources. Defaults to true when omitted alongside a non-empty knowledge_source_ids; send false explicitly to attach sources without using them yet.
+          title: Enabled
+        knowledge_source_ids:
+          anyOf:
+          - items:
+              type: string
+            type: array
+          - type: 'null'
+          default: null
+          description: Replaces the attached knowledge sources wholesale. Every id must be an existing knowledge source visible to the agent, else 422.
+          title: Knowledge Source Ids
+      title: PublicAgentKnowledgeBasePatch
+      type: object
+    AgentKeypadMenuPatch:
+      additionalProperties: false
+      properties:
+        enabled:
+          default: false
+          title: Enabled
+          type: boolean
+        prompt:
+          default: ''
+          title: Prompt
+          type: string
+        options:
+          default: []
+          items:
+            $ref: '#/components/schemas/AgentKeypadMenuOptionPatch'
+          maxItems: 12
+          title: Options
+          type: array
+        accept_speech:
+          default: true
+          title: Accept Speech
+          type: boolean
+        variable:
+          default: menu_choice
+          title: Variable
+          type: string
+        no_input_timeout_seconds:
+          default: 5
+          maximum: 15
+          minimum: 2
+          title: No Input Timeout Seconds
+          type: integer
+        max_attempts:
+          default: 2
+          maximum: 3
+          minimum: 1
+          title: Max Attempts
+          type: integer
+        retry_message:
+          default: ''
+          title: Retry Message
+          type: string
+        fallback_value:
+          default: ''
+          title: Fallback Value
+          type: string
+      title: AgentKeypadMenuPatch
+      type: object
+    PublicConversationInitWebhookPayload:
+      additionalProperties: false
+      properties:
+        url:
+          maxLength: 4000
+          minLength: 1
+          title: Url
+          type: string
+        secret:
+          anyOf:
+          - maxLength: 256
+            type: string
+          - type: 'null'
+          default: null
+          description: 'Optional HMAC-SHA256 signing secret (X-Fish-Webhook-Signature). Write-only: reads report `has_secret` instead of the value. Omit it (or send null) to keep the secret already stored for the same url; send an empty string to remove it.'
+          title: Secret
+        timeout_seconds:
+          default: 5.0
+          description: How long the platform waits for the endpoint before connecting the call without variables.
+          maximum: 8.0
+          minimum: 1.0
+          title: Timeout Seconds
+          type: number
+      required:
+      - url
+      title: PublicConversationInitWebhookPayload
+      type: object
+    PublicAgentToolsPatch:
+      additionalProperties: false
+      properties:
+        enabled:
+          anyOf:
+          - type: boolean
+          - type: 'null'
+          default: null
+          title: Enabled
+        tool_ids:
+          anyOf:
+          - items:
+              type: string
+            type: array
+          - type: 'null'
+          default: null
+          description: Replaces the attached tool set wholesale. Every id must be an existing tool in the agent's workspace, else 422.
+          title: Tool Ids
+        system_tools:
+          anyOf:
+          - $ref: '#/components/schemas/PublicSystemToolsPatch'
+          - type: 'null'
+          default: null
+      title: PublicAgentToolsPatch
+      type: object
+    PublicAgentKnowledgeBaseConfig:
+      properties:
+        enabled:
+          default: false
+          title: Enabled
+          type: boolean
+        knowledge_source_ids:
+          items:
+            type: string
+          title: Knowledge Source Ids
+          type: array
+      title: PublicAgentKnowledgeBaseConfig
+      type: object
+    AgentAnalysisCriterion:
+      properties:
+        name:
+          pattern: ^[a-z][a-z0-9_]{0,63}$
+          title: Name
+          type: string
+        description:
+          default: ''
+          maxLength: 500
+          title: Description
+          type: string
+      required:
+      - name
+      title: AgentAnalysisCriterion
+      type: object
+    PublicAgentWebhooksPatch:
+      additionalProperties: false
+      properties:
+        conversation_init:
+          anyOf:
+          - $ref: '#/components/schemas/PublicConversationInitWebhookPayload'
+          - type: 'null'
+          default: null
+          description: 'Pre-call webhook for inbound phone calls: called while the call is being set up; the response''s dynamic_variables render into the published prompt before the agent speaks. An explicit null removes it. Takes effect after the next publish.'
+        post_call:
+          anyOf:
+          - items:
+              $ref: '#/components/schemas/PublicPostCallWebhookPayload'
+            maxItems: 5
+            type: array
+          - type: 'null'
+          default: null
+          description: Up to 5 endpoints, each receiving every post-call event. Replaces the configured list wholesale; a single object is still accepted and is stored as a one-element list, and null (or an empty list) clears every endpoint. URLs must be unique.
+          title: Post Call
+      title: PublicAgentWebhooksPatch
+      type: object
+    PublicConversationInitWebhook:
+      properties:
+        url:
+          title: Url
+          type: string
+        has_secret:
+          default: false
+          description: Whether a signing secret is configured; the value itself is never returned.
+          title: Has Secret
+          type: boolean
+        timeout_seconds:
+          default: 5.0
+          title: Timeout Seconds
+          type: number
+      required:
+      - url
+      title: PublicConversationInitWebhook
+      type: object
+    PublicAgentAnalysisCriterion:
+      additionalProperties: false
+      properties:
+        name:
+          pattern: ^[a-z][a-z0-9_]{0,63}$
+          title: Name
+          type: string
+        description:
+          default: ''
+          maxLength: 500
+          title: Description
+          type: string
+      required:
+      - name
+      title: PublicAgentAnalysisCriterion
+      type: object
+    PublicAgentCreatePayload:
+      additionalProperties: false
+      properties:
+        name:
+          maxLength: 120
+          minLength: 1
+          title: Name
+          type: string
+        description:
+          default: ''
+          maxLength: 2000
+          title: Description
+          type: string
+        config:
+          anyOf:
+          - $ref: '#/components/schemas/PublicAgentConfigPatchPayload'
+          - type: 'null'
+          default: null
+          description: Optional initial draft configuration, applied atop the platform defaults; one call provisions a fully configured agent.
+      required:
+      - name
+      title: PublicAgentCreatePayload
+      type: object
+    AgentConversationConfig:
+      properties:
+        max_duration_seconds:
+          default: 1800
+          title: Max Duration Seconds
+          type: integer
+        response_wait_ms:
+          default: 550
+          title: Response Wait Ms
+          type: integer
+        eagerness:
+          default: balanced
+          enum:
+          - relaxed
+          - balanced
+          - eager
+          title: Eagerness
+          type: string
+        response_max_wait_ms:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          default: null
+          title: Response Max Wait Ms
+        interruptible:
+          default: true
+          title: Interruptible
+          type: boolean
+        interruption_sensitivity:
+          default: balanced
+          enum:
+          - low
+          - balanced
+          - high
+          title: Interruption Sensitivity
+          type: string
+        interruption_ignore_phrases:
+          default: []
+          items:
+            type: string
+          title: Interruption Ignore Phrases
+          type: array
+        speculative_response:
+          default: true
+          title: Speculative Response
+          type: boolean
+        reengage_enabled:
+          default: false
+          title: Reengage Enabled
+          type: boolean
+        hangup_after_seconds:
+          default: 60
+          title: Hangup After Seconds
+          type: integer
+        hangup_farewell_enabled:
+          default: false
+          title: Hangup Farewell Enabled
+          type: boolean
+        record_audio:
+          default: true
+          title: Record Audio
+          type: boolean
+        timezone:
+          default: ''
+          title: Timezone
+          type: string
+        transfer_destinations:
+          default: []
+          items:
+            $ref: '#/components/schemas/AgentTransferDestination'
+          title: Transfer Destinations
+          type: array
+        transfer_refuse_questions:
+          default: true
+          title: Transfer Refuse Questions
+          type: boolean
+        outbound:
+          anyOf:
+          - $ref: '#/components/schemas/AgentOutboundConfig'
+          - type: 'null'
+          default: null
+        keypad_menu:
+          $ref: '#/components/schemas/AgentKeypadMenu'
+        keypad_input:
+          $ref: '#/components/schemas/AgentKeypadInput'
+        echo_guard:
+          anyOf:
+          - $ref: '#/components/schemas/AgentEchoGuard'
+          - type: 'null'
+          default: null
+          description: 'Echo guard. For the first 3 seconds after the agent first starts talking in a call, the caller cannot interrupt it and anything the caller says while the agent is talking is not heard. This stops the agent''s own voice, echoing back from a speakerphone or laptop, from cutting it off. Per channel: true on, false off, null uses the default (on for web_voice and phone_inbound, off for phone_outbound).'
+      title: AgentConversationConfig
+      type: object
+    AgentEchoGuardPatch:
+      additionalProperties: false
+      properties:
+        web_voice:
+          anyOf:
+          - type: boolean
+          - type: 'null'
+          default: null
+          description: Voice calls in a browser or app (web widget, SDK, test calls). Null uses the default (on).
+          title: Web Voice
+        phone_inbound:
+          anyOf:
+          - type: boolean
+          - type: 'null'
+          default: null
+          description: Inbound phone calls. Null uses the default (on).
+          title: Phone Inbound
+        phone_outbound:
+          anyOf:
+          - type: boolean
+          - type: 'null'
+          default: null
+          description: Outbound phone calls. Null uses the default (off).
+          title: Phone Outbound
+      title: AgentEchoGuardPatch
+      type: object
+    PublicAgentAnalysisPatch:
+      additionalProperties: false
+      properties:
+        summary:
+          anyOf:
+          - $ref: '#/components/schemas/PublicAgentAnalysisSummaryPatch'
+          - type: 'null'
+          default: null
+        data_fields:
+          anyOf:
+          - items:
+              $ref: '#/components/schemas/PublicAgentAnalysisDataField'
+            maxItems: 20
+            type: array
+          - type: 'null'
+          default: null
+          title: Data Fields
+        criteria:
+          anyOf:
+          - items:
+              $ref: '#/components/schemas/PublicAgentAnalysisCriterion'
+            maxItems: 10
+            type: array
+          - type: 'null'
+          default: null
+          title: Criteria
+      title: PublicAgentAnalysisPatch
+      type: object
+    PublicAgentAsrPatch:
+      additionalProperties: false
+      properties:
+        model:
+          anyOf:
+          - enum:
+            - deepgram:nova-3
+            - elevenlabs:scribe_v2_realtime
+            - elevenlabs:scribe_v2_medical
+            - fish_audio:transcribe-1-pro-realtime
+            type: string
+          - type: 'null'
+          default: null
+          title: Model
+        multilingual:
+          anyOf:
+          - type: boolean
+          - type: 'null'
+          default: null
+          title: Multilingual
+        strict_language:
+          anyOf:
+          - type: boolean
+          - type: 'null'
+          default: null
+          description: 'Enforces voice.speaking_language whatever multilingual says: speech recognized as another language reaches the agent as [unintelligible speech]. Language is detected per utterance, so a short or heavily accented phrase in the speaking language can occasionally be detected as another language and replaced too. With deepgram:nova-3, speech in another language is usually not transcribed at all. Only enable it when you explicitly need to stop the agent from understanding other languages.'
+          title: Strict Language
+        keyterms:
+          anyOf:
+          - items:
+              type: string
+            maxItems: 50
+            type: array
+          - type: 'null'
+          default: null
+          title: Keyterms
+      title: PublicAgentAsrPatch
+      type: object
+    PublicAgentConversationPatch:
+      additionalProperties: false
+      properties:
+        max_duration_seconds:
+          anyOf:
+          - maximum: 3600
+            minimum: 60
+            type: integer
+          - type: 'null'
+          default: null
+          title: Max Duration Seconds
+        response_wait_ms:
+          anyOf:
+          - maximum: 2000
+            minimum: 300
+            type: integer
+          - type: 'null'
+          default: null
+          title: Response Wait Ms
+        eagerness:
+          anyOf:
+          - enum:
+            - relaxed
+            - balanced
+            - eager
+            type: string
+          - type: 'null'
+          default: null
+          title: Eagerness
+        response_max_wait_ms:
+          anyOf:
+          - maximum: 4000
+            minimum: 0
+            type: integer
+          - type: 'null'
+          default: null
+          title: Response Max Wait Ms
+        interruptible:
+          anyOf:
+          - type: boolean
+          - type: 'null'
+          default: null
+          title: Interruptible
+        interruption_sensitivity:
+          anyOf:
+          - enum:
+            - low
+            - balanced
+            - high
+            type: string
+          - type: 'null'
+          default: null
+          title: Interruption Sensitivity
+        interruption_ignore_phrases:
+          anyOf:
+          - items:
+              type: string
+            maxItems: 50
+            type: array
+          - type: 'null'
+          default: null
+          title: Interruption Ignore Phrases
+        speculative_response:
+          anyOf:
+          - type: boolean
+          - type: 'null'
+          default: null
+          title: Speculative Response
+        reengage_enabled:
+          anyOf:
+          - type: boolean
+          - type: 'null'
+          default: null
+          title: Reengage Enabled
+        hangup_after_seconds:
+          anyOf:
+          - maximum: 3600
+            minimum: 10
+            type: integer
+          - type: 'null'
+          default: null
+          title: Hangup After Seconds
+        hangup_farewell_enabled:
+          anyOf:
+          - type: boolean
+          - type: 'null'
+          default: null
+          title: Hangup Farewell Enabled
+        record_audio:
+          anyOf:
+          - type: boolean
+          - type: 'null'
+          default: null
+          title: Record Audio
+        timezone:
+          anyOf:
+          - maxLength: 64
+            type: string
+          - type: 'null'
+          default: null
+          title: Timezone
+        transfer_destinations:
+          anyOf:
+          - items:
+              $ref: '#/components/schemas/AgentTransferDestinationPatch'
+            type: array
+          - type: 'null'
+          default: null
+          title: Transfer Destinations
+        transfer_refuse_questions:
+          anyOf:
+          - type: boolean
+          - type: 'null'
+          default: null
+          title: Transfer Refuse Questions
+        outbound:
+          anyOf:
+          - $ref: '#/components/schemas/AgentOutboundPatch'
+          - type: 'null'
+          default: null
+        keypad_menu:
+          anyOf:
+          - $ref: '#/components/schemas/AgentKeypadMenuPatch'
+          - type: 'null'
+          default: null
+        keypad_input:
+          anyOf:
+          - $ref: '#/components/schemas/AgentKeypadInputPatch'
+          - type: 'null'
+          default: null
+        echo_guard:
+          anyOf:
+          - $ref: '#/components/schemas/AgentEchoGuardPatch'
+          - type: 'null'
+          default: null
+          description: 'Echo guard. For the first 3 seconds after the agent first starts talking in a call, the caller cannot interrupt it and anything the caller says while the agent is talking is not heard. This stops the agent''s own voice, echoing back from a speakerphone or laptop, from cutting it off. Per channel: true on, false off, null uses the default (on for web_voice and phone_inbound, off for phone_outbound). Channels you send replace the stored value, null on a channel resets it to the default, channels you leave out are kept. null resets every channel.'
+      title: PublicAgentConversationPatch
+      type: object
+    AgentTransferDestinationPatch:
+      additionalProperties: false
+      properties:
+        type:
+          default: phone
+          enum:
+          - phone
+          - sip
+          title: Type
+          type: string
+        label:
+          default: ''
+          title: Label
+          type: string
+        phone_number:
+          anyOf:
+          - type: string
+          - type: 'null'
+          default: null
+          title: Phone Number
+        sip_uri:
+          anyOf:
+          - type: string
+          - type: 'null'
+          default: null
+          title: Sip Uri
+        description:
+          default: ''
+          title: Description
+          type: string
+        mode:
+          default: cold
+          enum:
+          - cold
+          - warm
+          title: Mode
+          type: string
+        warm_connect:
+          default: confirm
+          enum:
+          - confirm
+          - briefing
+          - direct
+          title: Warm Connect
+          type: string
+        warm_briefing_instructions:
+          default: ''
+          title: Warm Briefing Instructions
+          type: string
+        warm_ring_timeout_seconds:
+          default: 30
+          title: Warm Ring Timeout Seconds
+          type: integer
+        warm_confirm_timeout_seconds:
+          default: 60
+          title: Warm Confirm Timeout Seconds
+          type: integer
+        warm_human_detection:
+          default: false
+          description: Applies to warm transfers whose warm_connect is `confirm` or `briefing`, and is ignored for cold transfers and `direct`. When true, once the destination answers, the agent stays silent until the other side speaks, then classifies the pickup. A person is briefed as usual. Voicemail or an IVR (phone menu) ends the transfer as failed. A hold queue or silence keeps the agent waiting until `warm_confirm_timeout_seconds` ends the attempt as unreachable. A failed transfer follows `on_failure`. Leave it off for destinations whose people are only reachable through a phone menu, because the menu stops the transfer.
+          title: Warm Human Detection
+          type: boolean
+        on_failure:
+          $ref: '#/components/schemas/AgentTransferOnFailurePatch'
+        announcement_mode:
+          default: generated
+          enum:
+          - generated
+          - fixed
+          - 'off'
+          title: Announcement Mode
+          type: string
+        announcement_message:
+          default: ''
+          title: Announcement Message
+          type: string
+      title: AgentTransferDestinationPatch
+      type: object
+    AgentGuardrailsConfig:
+      properties:
+        focus:
+          default: false
+          title: Focus
+          type: boolean
+        manipulation:
+          default: false
+          title: Manipulation
+          type: boolean
+      title: AgentGuardrailsConfig
+      type: object
+    AgentOutboundPatch:
+      additionalProperties: false
+      properties:
+        amd_enabled:
+          default: true
+          title: Amd Enabled
+          type: boolean
+        voicemail:
+          anyOf:
+          - $ref: '#/components/schemas/AgentOutboundVoicemailPatch'
+          - type: 'null'
+          default: null
+      title: AgentOutboundPatch
+      type: object
+    PublicAgentUpdatePayload:
+      additionalProperties: false
+      properties:
+        name:
+          anyOf:
+          - maxLength: 120
+            minLength: 1
+            type: string
+          - type: 'null'
+          default: null
+          title: Name
+        description:
+          anyOf:
+          - maxLength: 2000
+            type: string
+          - type: 'null'
+          default: null
+          title: Description
+        status:
+          anyOf:
+          - enum:
+            - active
+            - archived
+            type: string
+          - type: 'null'
+          default: null
+          title: Status
+        public_enabled:
+          anyOf:
+          - type: boolean
+          - type: 'null'
+          default: null
+          description: Allow keyless session creation from the browser SDK, gated by allowed_origins.
+          title: Public Enabled
+        allowed_origins:
+          anyOf:
+          - items:
+              type: string
+            maxItems: 20
+            type: array
+          - type: 'null'
+          default: null
+          title: Allowed Origins
+        overrides_allowed:
+          anyOf:
+          - items:
+              enum:
+              - first_message
+              - system_prompt
+              - voice_id
+              - language
+              - asr.model
+              type: string
+            maxItems: 8
+            type: array
+          - type: 'null'
+          default: null
+          description: Which session-creation overrides callers may use. An empty list rejects all overrides.
+          title: Overrides Allowed
+      title: PublicAgentUpdatePayload
+      type: object
+    AgentSystemToolsConfig:
+      properties:
+        hang_up_call:
+          default: false
+          title: Hang Up Call
+          type: boolean
+        hang_up_call_farewell_mode:
+          default: generated
+          enum:
+          - generated
+          - fixed
+          - 'off'
+          title: Hang Up Call Farewell Mode
+          type: string
+        hang_up_call_farewell_message:
+          default: ''
+          title: Hang Up Call Farewell Message
+          type: string
+        hang_up_call_refuse_questions:
+          default: false
+          title: Hang Up Call Refuse Questions
+          type: boolean
+      title: AgentSystemToolsConfig
+      type: object
+    PublicAgentAnalysisDataField:
+      additionalProperties: false
+      properties:
+        name:
+          pattern: ^[a-z][a-z0-9_]{0,63}$
+          title: Name
+          type: string
+        type:
+          default: text
+          enum:
+          - boolean
+          - text
+          - number
+          - enum
+          title: Type
+          type: string
+        description:
+          default: ''
+          maxLength: 500
+          title: Description
+          type: string
+        enum_options:
+          anyOf:
+          - items:
+              type: string
+            type: array
+          - type: 'null'
+          default: null
+          title: Enum Options
+      required:
+      - name
+      title: PublicAgentAnalysisDataField
+      type: object
+    AgentAnalysisSummaryConfig:
+      properties:
+        enabled:
+          default: true
+          title: Enabled
+          type: boolean
+        prompt:
+          anyOf:
+          - maxLength: 1000
+            type: string
+          - type: 'null'
+          default: null
+          title: Prompt
+        language:
+          default: en
+          enum:
+          - en
+          - ja
+          - zh
+          - ko
+          - es
+          - fr
+          - de
+          - pt
+          - it
+          - nl
+          - ar
+          - hi
+          - id
+          - tr
+          - ru
+          - bg
+          - sr
+          - hr
+          - cs
+          - sk
+          - pl
+          - uk
+          - ro
+          - hu
+          - el
+          - sv
+          - da
+          - 'no'
+          - fi
+          - et
+          - lv
+          - lt
+          - ca
+          - he
+          - fa
+          - ur
+          - kk
+          - ka
+          - hy
+          - bn
+          - ta
+          - te
+          - kn
+          - mr
+          - gu
+          - pa
+          - ne
+          - th
+          - vi
+          - ms
+          - tl
+          - af
+          title: Language
+          type: string
+      title: AgentAnalysisSummaryConfig
+      type: object
+    PublicAgentWebhooksConfig:
+      properties:
+        conversation_init:
+          anyOf:
+          - $ref: '#/components/schemas/PublicConversationInitWebhook'
+          - type: 'null'
+          default: null
+        post_call:
+          items:
+            $ref: '#/components/schemas/PublicPostCallWebhook'
+          title: Post Call
+          type: array
+      title: PublicAgentWebhooksConfig
+      type: object
+    AgentLLMCustomConfigRedacted:
+      description: 'Read entity: the stored api_key never leaves the collection.'
+      properties:
+        base_url:
+          minLength: 1
+          title: Base Url
+          type: string
+        model:
+          minLength: 1
+          title: Model
+          type: string
+        api_key:
+          default: null
+          title: Api Key
+          type: 'null'
+      required:
+      - base_url
+      - model
+      title: AgentLLMCustomConfigRedacted
+      type: object
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer

@@ -1,0 +1,1707 @@
+openapi: 3.2.0
+info:
+  title: FishAudio Open Phone Numbers API
+  version: '1'
+servers:
+- description: Fish Audio API
+  url: https://api.fish.audio
+tags:
+- name: Phone Numbers
+paths:
+  /v1/agent/available-phone-numbers:
+    get:
+      summary: Search Available Phone Numbers
+      description: 'Search the purchasable number inventory. Buy an entry with
+
+        `POST /v1/agent/phone-numbers`; availability is not a reservation, so a listed
+
+        number can still be claimed by someone else first.'
+      security:
+      - BearerAuth: []
+      parameters:
+      - in: query
+        name: country_code
+        description: ISO 3166-1 alpha-2 country code; `US` or `CA`.
+        required: false
+        schema:
+          default: US
+          title: Country Code
+          type: string
+        deprecated: false
+      - in: query
+        name: area_code
+        description: Restrict to one area code, e.g. 415.
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          default: null
+          title: Area Code
+        deprecated: false
+      - in: query
+        name: number_type
+        description: The managed inventory is US/CA local numbers only; `toll_free` currently returns 400.
+        required: false
+        schema:
+          default: local
+          enum:
+          - local
+          - toll_free
+          title: Number Type
+          type: string
+        deprecated: false
+      - in: query
+        name: provider
+        description: Inventory to search. Only the managed `twilio` inventory (call-transfer support) is available; the parameter is kept so importing your own numbers can extend it later.
+        required: false
+        schema:
+          anyOf:
+          - const: twilio
+            type: string
+          - type: 'null'
+          default: null
+          title: Provider
+        deprecated: false
+      responses:
+        '200':
+          description: Request fulfilled, document follows
+          headers: {}
+          content:
+            application/json:
+              schema:
+                properties:
+                  available_phone_numbers:
+                    description: Inventory entries forwarded from the provider (number, region, pricing).
+                    items:
+                      additionalProperties: true
+                      type: object
+                    title: Available Phone Numbers
+                    type: array
+                required:
+                - available_phone_numbers
+                type: object
+        '400':
+          description: Bad request syntax or unsupported method
+          headers: {}
+          content:
+            application/json:
+              schema:
+                properties:
+                  status:
+                    title: Status
+                    type: integer
+                  message:
+                    title: Message
+                    type: string
+                  reason:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    title: Reason
+                required:
+                - status
+                - message
+                type: object
+        '401':
+          description: No permission -- see authorization schemes
+          headers: {}
+          content:
+            application/json:
+              schema:
+                properties:
+                  status:
+                    title: Status
+                    type: integer
+                  message:
+                    title: Message
+                    type: string
+                  reason:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    title: Reason
+                required:
+                - status
+                - message
+                type: object
+        '502':
+          description: Invalid responses from another server/proxy
+          headers: {}
+          content:
+            application/json:
+              schema:
+                properties:
+                  status:
+                    title: Status
+                    type: integer
+                  message:
+                    title: Message
+                    type: string
+                  reason:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    title: Reason
+                required:
+                - status
+                - message
+                type: object
+        '503':
+          description: The server cannot process the request due to a high load
+          headers: {}
+          content:
+            application/json:
+              schema:
+                properties:
+                  status:
+                    title: Status
+                    type: integer
+                  message:
+                    title: Message
+                    type: string
+                  reason:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    title: Reason
+                required:
+                - status
+                - message
+                type: object
+      tags:
+      - Phone Numbers
+      operationId: getV1AgentAvailablePhoneNumbers
+      x-operation-id-source: derived
+  /v1/agent/phone-numbers:
+    get:
+      summary: List Phone Numbers
+      description: 'List your team''s phone numbers, newest first. Released numbers are gone
+
+        for good and never appear. Look an id up by E.164 with `phone_number`, or
+
+        filter with `agent_id` to see one agent''s numbers. Paginate with `cursor`
+
+        (follow `next_cursor` while `has_more` is true) or with `page` for offset
+
+        pagination with a `total` count — the two are mutually exclusive.'
+      security:
+      - BearerAuth: []
+      parameters:
+      - in: query
+        name: phone_number
+        description: Exact E.164 match, e.g. +14155550123.
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          default: null
+          title: Phone Number
+        deprecated: false
+      - in: query
+        name: agent_id
+        description: Only numbers bound to this agent.
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          default: null
+          title: Agent Id
+        deprecated: false
+      - in: query
+        name: cursor
+        description: ''
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          default: null
+          title: Cursor
+        deprecated: false
+      - in: query
+        name: page
+        description: 1-based page number; mutually exclusive with cursor.
+        required: false
+        schema:
+          anyOf:
+          - minimum: 1
+            type: integer
+          - type: 'null'
+          default: null
+          title: Page
+        deprecated: false
+      - in: query
+        name: include_total
+        description: ''
+        required: false
+        schema:
+          default: false
+          title: Include Total
+          type: boolean
+        deprecated: false
+      - in: query
+        name: page_size
+        description: ''
+        required: false
+        schema:
+          default: 30
+          maximum: 100
+          minimum: 1
+          title: Page Size
+          type: integer
+        deprecated: false
+      responses:
+        '200':
+          description: Request fulfilled, document follows
+          headers: {}
+          content:
+            application/json:
+              schema:
+                properties:
+                  phone_numbers:
+                    items:
+                      $ref: '#/components/schemas/PublicPhoneNumberEntity'
+                    title: Phone Numbers
+                    type: array
+                  has_more:
+                    title: Has More
+                    type: boolean
+                  next_cursor:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    title: Next Cursor
+                  total:
+                    anyOf:
+                    - type: integer
+                    - type: 'null'
+                    default: null
+                    title: Total
+                required:
+                - phone_numbers
+                - has_more
+                type: object
+        '400':
+          description: Bad request syntax or unsupported method
+          headers: {}
+          content:
+            application/json:
+              schema:
+                properties:
+                  status:
+                    title: Status
+                    type: integer
+                  message:
+                    title: Message
+                    type: string
+                  reason:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    title: Reason
+                required:
+                - status
+                - message
+                type: object
+        '401':
+          description: No permission -- see authorization schemes
+          headers: {}
+          content:
+            application/json:
+              schema:
+                properties:
+                  status:
+                    title: Status
+                    type: integer
+                  message:
+                    title: Message
+                    type: string
+                  reason:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    title: Reason
+                required:
+                - status
+                - message
+                type: object
+        '404':
+          description: Nothing matches the given URI
+          headers: {}
+          content:
+            application/json:
+              schema:
+                properties:
+                  status:
+                    title: Status
+                    type: integer
+                  message:
+                    title: Message
+                    type: string
+                  reason:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    title: Reason
+                required:
+                - status
+                - message
+                type: object
+        '503':
+          description: The server cannot process the request due to a high load
+          headers: {}
+          content:
+            application/json:
+              schema:
+                properties:
+                  status:
+                    title: Status
+                    type: integer
+                  message:
+                    title: Message
+                    type: string
+                  reason:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    title: Reason
+                required:
+                - status
+                - message
+                type: object
+      tags:
+      - Phone Numbers
+      operationId: getV1AgentPhoneNumbers
+      x-operation-id-source: derived
+    post:
+      summary: Purchase or Import Phone Number
+      description: '`provider` discriminates two variants. `twilio` buys a number from the
+
+        managed inventory: it lands in your default workspace, any `agent_id` you
+
+        bind must live there too, and billing is the monthly price charged in
+
+        daily slices; the first day is charged before anything is bought (402
+
+        costs you nothing) and the daily run advances it from there. `sip`
+
+        imports a number you already own at your carrier: point your trunk''s
+
+        origination at our SIP host, provide inbound authentication (digest
+
+        and/or source CIDRs) and optionally a termination host so the number can
+
+        place calls; nothing is rented and there is no monthly fee. Either way,
+
+        409 means the number is already on the platform; 502 means the provider
+
+        or trunk provisioning refused, and the number stays visible with status
+
+        `error` and is safe to release.'
+      security:
+      - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              anyOf:
+              - $ref: '#/components/schemas/PublicPhoneNumberPurchasePayload'
+              - $ref: '#/components/schemas/PublicSipNumberImportPayload'
+      responses:
+        '201':
+          description: Document created, URL follows
+          headers: {}
+          content:
+            application/json:
+              schema:
+                properties:
+                  phone_number_id:
+                    title: Phone Number Id
+                    type: string
+                  workspace_id:
+                    title: Workspace Id
+                    type: string
+                  phone_number:
+                    description: E.164, e.g. +14155550123.
+                    title: Phone Number
+                    type: string
+                  provider:
+                    enum:
+                    - livekit
+                    - twilio
+                    - sip
+                    title: Provider
+                    type: string
+                  label:
+                    default: ''
+                    title: Label
+                    type: string
+                  agent_id:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    description: Inbound calls route to this agent; unbound numbers ring busy.
+                    title: Agent Id
+                  transfer_caller_id:
+                    anyOf:
+                    - enum:
+                      - agent_number
+                      - original_caller
+                      type: string
+                    - type: 'null'
+                    default: null
+                    description: 'Managed `twilio` numbers: the caller ID a transfer target sees, on cold and warm transfers alike. `agent_number` shows this number, `original_caller` shows the caller''s own number (a warm transfer falls back to this number when the caller withholds theirs). `null` for imported `sip` numbers, whose carrier decides.'
+                    title: Transfer Caller Id
+                  cold_transfer_use_original_caller:
+                    anyOf:
+                    - type: boolean
+                    - type: 'null'
+                    default: null
+                    deprecated: true
+                    description: Deprecated, read `transfer_caller_id`. True when it is `original_caller`.
+                    title: Cold Transfer Use Original Caller
+                  cold_transfer_use_original_caller_effective:
+                    anyOf:
+                    - type: boolean
+                    - type: 'null'
+                    default: null
+                    deprecated: true
+                    description: Deprecated, read `caller_id_sync_status`. Whether the carrier has confirmed the original caller policy for cold transfers, `null` while unknown.
+                    title: Cold Transfer Use Original Caller Effective
+                  caller_id_sync_status:
+                    default: carrier_managed
+                    description: '`synced` once the carrier confirmed the policy, `pending` while it is being applied, `error` when the last attempt failed (send `retry_caller_id_sync`), `carrier_managed` for imported `sip` numbers.'
+                    enum:
+                    - synced
+                    - pending
+                    - error
+                    - carrier_managed
+                    title: Caller Id Sync Status
+                    type: string
+                  caller_id_sync_error:
+                    default: ''
+                    description: Why the last synchronization failed; empty otherwise.
+                    title: Caller Id Sync Error
+                    type: string
+                  status:
+                    enum:
+                    - provisioning
+                    - active
+                    - error
+                    - released
+                    title: Status
+                    type: string
+                  status_detail:
+                    default: ''
+                    description: What failed when status is `error`; empty otherwise.
+                    title: Status Detail
+                    type: string
+                  supports_outbound:
+                    default: false
+                    description: 'Whether the number can place calls (outbound and warm-transfer consult legs): managed `twilio` always, imported `sip` only when a termination was configured.'
+                    title: Supports Outbound
+                    type: boolean
+                  termination_uri:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    description: 'Imported `sip` numbers: the customer trunk''s termination host.'
+                    title: Termination Uri
+                  inbound_auth_username:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    description: 'Imported `sip` numbers: the inbound digest username. Passwords are never echoed.'
+                    title: Inbound Auth Username
+                  inbound_allowed_addresses:
+                    description: 'Imported `sip` numbers: allowed source IPs/CIDRs.'
+                    items:
+                      type: string
+                    title: Inbound Allowed Addresses
+                    type: array
+                  termination_transport:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    description: 'Imported `sip` numbers: termination transport.'
+                    title: Termination Transport
+                  termination_auth_username:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    description: 'Imported `sip` numbers: the termination digest username. Passwords are never echoed.'
+                    title: Termination Auth Username
+                  termination_headers:
+                    additionalProperties:
+                      type: string
+                    description: 'Imported `sip` numbers: custom SIP headers added to every outbound INVITE through the termination.'
+                    title: Termination Headers
+                    type: object
+                  created_at:
+                    format: date-time
+                    title: Created At
+                    type: string
+                  updated_at:
+                    format: date-time
+                    title: Updated At
+                    type: string
+                required:
+                - phone_number_id
+                - workspace_id
+                - phone_number
+                - provider
+                - agent_id
+                - status
+                - created_at
+                - updated_at
+                type: object
+        '401':
+          description: No permission -- see authorization schemes
+          headers: {}
+          content:
+            application/json:
+              schema:
+                properties:
+                  status:
+                    title: Status
+                    type: integer
+                  message:
+                    title: Message
+                    type: string
+                  reason:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    title: Reason
+                required:
+                - status
+                - message
+                type: object
+        '402':
+          description: No payment -- see charging schemes
+          headers: {}
+          content:
+            application/json:
+              schema:
+                properties:
+                  status:
+                    title: Status
+                    type: integer
+                  message:
+                    title: Message
+                    type: string
+                  reason:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    title: Reason
+                required:
+                - status
+                - message
+                type: object
+        '403':
+          description: Request forbidden -- authorization will not help
+          headers: {}
+          content:
+            application/json:
+              schema:
+                properties:
+                  status:
+                    title: Status
+                    type: integer
+                  message:
+                    title: Message
+                    type: string
+                  reason:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    title: Reason
+                required:
+                - status
+                - message
+                type: object
+        '404':
+          description: Nothing matches the given URI
+          headers: {}
+          content:
+            application/json:
+              schema:
+                properties:
+                  status:
+                    title: Status
+                    type: integer
+                  message:
+                    title: Message
+                    type: string
+                  reason:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    title: Reason
+                required:
+                - status
+                - message
+                type: object
+        '409':
+          description: Request conflict
+          headers: {}
+          content:
+            application/json:
+              schema:
+                properties:
+                  status:
+                    title: Status
+                    type: integer
+                  message:
+                    title: Message
+                    type: string
+                  reason:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    title: Reason
+                required:
+                - status
+                - message
+                type: object
+        '422':
+          description: ''
+          headers: {}
+          content:
+            application/json:
+              schema:
+                properties:
+                  status:
+                    title: Status
+                    type: integer
+                  message:
+                    title: Message
+                    type: string
+                  reason:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    title: Reason
+                required:
+                - status
+                - message
+                type: object
+        '502':
+          description: Invalid responses from another server/proxy
+          headers: {}
+          content:
+            application/json:
+              schema:
+                properties:
+                  status:
+                    title: Status
+                    type: integer
+                  message:
+                    title: Message
+                    type: string
+                  reason:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    title: Reason
+                required:
+                - status
+                - message
+                type: object
+        '503':
+          description: The server cannot process the request due to a high load
+          headers: {}
+          content:
+            application/json:
+              schema:
+                properties:
+                  status:
+                    title: Status
+                    type: integer
+                  message:
+                    title: Message
+                    type: string
+                  reason:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    title: Reason
+                required:
+                - status
+                - message
+                type: object
+      tags:
+      - Phone Numbers
+      operationId: postV1AgentPhoneNumbers
+      x-operation-id-source: derived
+  /v1/agent/phone-numbers/{phone_number_id}:
+    get:
+      summary: Get Phone Number
+      description: 'Fetch one phone number, including its current agent binding and
+
+        provisioning status.'
+      security:
+      - BearerAuth: []
+      parameters:
+      - in: path
+        name: phone_number_id
+        description: ''
+        required: true
+        schema:
+          title: Phone Number Id
+          type: string
+        deprecated: false
+      responses:
+        '200':
+          description: Request fulfilled, document follows
+          headers: {}
+          content:
+            application/json:
+              schema:
+                properties:
+                  phone_number_id:
+                    title: Phone Number Id
+                    type: string
+                  workspace_id:
+                    title: Workspace Id
+                    type: string
+                  phone_number:
+                    description: E.164, e.g. +14155550123.
+                    title: Phone Number
+                    type: string
+                  provider:
+                    enum:
+                    - livekit
+                    - twilio
+                    - sip
+                    title: Provider
+                    type: string
+                  label:
+                    default: ''
+                    title: Label
+                    type: string
+                  agent_id:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    description: Inbound calls route to this agent; unbound numbers ring busy.
+                    title: Agent Id
+                  transfer_caller_id:
+                    anyOf:
+                    - enum:
+                      - agent_number
+                      - original_caller
+                      type: string
+                    - type: 'null'
+                    default: null
+                    description: 'Managed `twilio` numbers: the caller ID a transfer target sees, on cold and warm transfers alike. `agent_number` shows this number, `original_caller` shows the caller''s own number (a warm transfer falls back to this number when the caller withholds theirs). `null` for imported `sip` numbers, whose carrier decides.'
+                    title: Transfer Caller Id
+                  cold_transfer_use_original_caller:
+                    anyOf:
+                    - type: boolean
+                    - type: 'null'
+                    default: null
+                    deprecated: true
+                    description: Deprecated, read `transfer_caller_id`. True when it is `original_caller`.
+                    title: Cold Transfer Use Original Caller
+                  cold_transfer_use_original_caller_effective:
+                    anyOf:
+                    - type: boolean
+                    - type: 'null'
+                    default: null
+                    deprecated: true
+                    description: Deprecated, read `caller_id_sync_status`. Whether the carrier has confirmed the original caller policy for cold transfers, `null` while unknown.
+                    title: Cold Transfer Use Original Caller Effective
+                  caller_id_sync_status:
+                    default: carrier_managed
+                    description: '`synced` once the carrier confirmed the policy, `pending` while it is being applied, `error` when the last attempt failed (send `retry_caller_id_sync`), `carrier_managed` for imported `sip` numbers.'
+                    enum:
+                    - synced
+                    - pending
+                    - error
+                    - carrier_managed
+                    title: Caller Id Sync Status
+                    type: string
+                  caller_id_sync_error:
+                    default: ''
+                    description: Why the last synchronization failed; empty otherwise.
+                    title: Caller Id Sync Error
+                    type: string
+                  status:
+                    enum:
+                    - provisioning
+                    - active
+                    - error
+                    - released
+                    title: Status
+                    type: string
+                  status_detail:
+                    default: ''
+                    description: What failed when status is `error`; empty otherwise.
+                    title: Status Detail
+                    type: string
+                  supports_outbound:
+                    default: false
+                    description: 'Whether the number can place calls (outbound and warm-transfer consult legs): managed `twilio` always, imported `sip` only when a termination was configured.'
+                    title: Supports Outbound
+                    type: boolean
+                  termination_uri:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    description: 'Imported `sip` numbers: the customer trunk''s termination host.'
+                    title: Termination Uri
+                  inbound_auth_username:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    description: 'Imported `sip` numbers: the inbound digest username. Passwords are never echoed.'
+                    title: Inbound Auth Username
+                  inbound_allowed_addresses:
+                    description: 'Imported `sip` numbers: allowed source IPs/CIDRs.'
+                    items:
+                      type: string
+                    title: Inbound Allowed Addresses
+                    type: array
+                  termination_transport:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    description: 'Imported `sip` numbers: termination transport.'
+                    title: Termination Transport
+                  termination_auth_username:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    description: 'Imported `sip` numbers: the termination digest username. Passwords are never echoed.'
+                    title: Termination Auth Username
+                  termination_headers:
+                    additionalProperties:
+                      type: string
+                    description: 'Imported `sip` numbers: custom SIP headers added to every outbound INVITE through the termination.'
+                    title: Termination Headers
+                    type: object
+                  created_at:
+                    format: date-time
+                    title: Created At
+                    type: string
+                  updated_at:
+                    format: date-time
+                    title: Updated At
+                    type: string
+                required:
+                - phone_number_id
+                - workspace_id
+                - phone_number
+                - provider
+                - agent_id
+                - status
+                - created_at
+                - updated_at
+                type: object
+        '401':
+          description: No permission -- see authorization schemes
+          headers: {}
+          content:
+            application/json:
+              schema:
+                properties:
+                  status:
+                    title: Status
+                    type: integer
+                  message:
+                    title: Message
+                    type: string
+                  reason:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    title: Reason
+                required:
+                - status
+                - message
+                type: object
+        '404':
+          description: Nothing matches the given URI
+          headers: {}
+          content:
+            application/json:
+              schema:
+                properties:
+                  status:
+                    title: Status
+                    type: integer
+                  message:
+                    title: Message
+                    type: string
+                  reason:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    title: Reason
+                required:
+                - status
+                - message
+                type: object
+        '503':
+          description: The server cannot process the request due to a high load
+          headers: {}
+          content:
+            application/json:
+              schema:
+                properties:
+                  status:
+                    title: Status
+                    type: integer
+                  message:
+                    title: Message
+                    type: string
+                  reason:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    title: Reason
+                required:
+                - status
+                - message
+                type: object
+      tags:
+      - Phone Numbers
+      operationId: getV1AgentPhoneNumbersByPhoneNumberId
+      x-operation-id-source: derived
+    patch:
+      summary: Update Phone Number
+      description: 'Change the label and/or repoint the number at another agent — the
+
+        deployment-pipeline move (rebind from the staging agent to the production
+
+        one). Send `agent_id: null` to unbind; unbound numbers ring busy. The
+
+        agent must live in the number''s workspace. Rebinding is a routing-table
+
+        update resolved on the next inbound call; nothing about the number itself
+
+        is reprovisioned.
+
+
+        Managed `twilio` numbers also accept `transfer_caller_id`, which picks
+
+        the number a transfer target sees (cold and warm alike), and
+
+        `retry_caller_id_sync` to re-apply it after a failed synchronization. Read
+
+        `caller_id_sync_status` on the response. Imported `sip` numbers return 409
+
+        for either field because their carrier owns the setting.
+
+
+        Every field here is a number setting, not agent config: changes apply
+
+        from the next call without publishing, and publishing or rolling back the
+
+        agent never changes them. Cold-transfer caller ID applies once
+
+        `caller_id_sync_status` is `synced`.'
+      security:
+      - BearerAuth: []
+      parameters:
+      - in: path
+        name: phone_number_id
+        description: ''
+        required: true
+        schema:
+          title: Phone Number Id
+          type: string
+        deprecated: false
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PublicPhoneNumberUpdatePayload'
+      responses:
+        '200':
+          description: Request fulfilled, document follows
+          headers: {}
+          content:
+            application/json:
+              schema:
+                properties:
+                  phone_number_id:
+                    title: Phone Number Id
+                    type: string
+                  workspace_id:
+                    title: Workspace Id
+                    type: string
+                  phone_number:
+                    description: E.164, e.g. +14155550123.
+                    title: Phone Number
+                    type: string
+                  provider:
+                    enum:
+                    - livekit
+                    - twilio
+                    - sip
+                    title: Provider
+                    type: string
+                  label:
+                    default: ''
+                    title: Label
+                    type: string
+                  agent_id:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    description: Inbound calls route to this agent; unbound numbers ring busy.
+                    title: Agent Id
+                  transfer_caller_id:
+                    anyOf:
+                    - enum:
+                      - agent_number
+                      - original_caller
+                      type: string
+                    - type: 'null'
+                    default: null
+                    description: 'Managed `twilio` numbers: the caller ID a transfer target sees, on cold and warm transfers alike. `agent_number` shows this number, `original_caller` shows the caller''s own number (a warm transfer falls back to this number when the caller withholds theirs). `null` for imported `sip` numbers, whose carrier decides.'
+                    title: Transfer Caller Id
+                  cold_transfer_use_original_caller:
+                    anyOf:
+                    - type: boolean
+                    - type: 'null'
+                    default: null
+                    deprecated: true
+                    description: Deprecated, read `transfer_caller_id`. True when it is `original_caller`.
+                    title: Cold Transfer Use Original Caller
+                  cold_transfer_use_original_caller_effective:
+                    anyOf:
+                    - type: boolean
+                    - type: 'null'
+                    default: null
+                    deprecated: true
+                    description: Deprecated, read `caller_id_sync_status`. Whether the carrier has confirmed the original caller policy for cold transfers, `null` while unknown.
+                    title: Cold Transfer Use Original Caller Effective
+                  caller_id_sync_status:
+                    default: carrier_managed
+                    description: '`synced` once the carrier confirmed the policy, `pending` while it is being applied, `error` when the last attempt failed (send `retry_caller_id_sync`), `carrier_managed` for imported `sip` numbers.'
+                    enum:
+                    - synced
+                    - pending
+                    - error
+                    - carrier_managed
+                    title: Caller Id Sync Status
+                    type: string
+                  caller_id_sync_error:
+                    default: ''
+                    description: Why the last synchronization failed; empty otherwise.
+                    title: Caller Id Sync Error
+                    type: string
+                  status:
+                    enum:
+                    - provisioning
+                    - active
+                    - error
+                    - released
+                    title: Status
+                    type: string
+                  status_detail:
+                    default: ''
+                    description: What failed when status is `error`; empty otherwise.
+                    title: Status Detail
+                    type: string
+                  supports_outbound:
+                    default: false
+                    description: 'Whether the number can place calls (outbound and warm-transfer consult legs): managed `twilio` always, imported `sip` only when a termination was configured.'
+                    title: Supports Outbound
+                    type: boolean
+                  termination_uri:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    description: 'Imported `sip` numbers: the customer trunk''s termination host.'
+                    title: Termination Uri
+                  inbound_auth_username:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    description: 'Imported `sip` numbers: the inbound digest username. Passwords are never echoed.'
+                    title: Inbound Auth Username
+                  inbound_allowed_addresses:
+                    description: 'Imported `sip` numbers: allowed source IPs/CIDRs.'
+                    items:
+                      type: string
+                    title: Inbound Allowed Addresses
+                    type: array
+                  termination_transport:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    description: 'Imported `sip` numbers: termination transport.'
+                    title: Termination Transport
+                  termination_auth_username:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    description: 'Imported `sip` numbers: the termination digest username. Passwords are never echoed.'
+                    title: Termination Auth Username
+                  termination_headers:
+                    additionalProperties:
+                      type: string
+                    description: 'Imported `sip` numbers: custom SIP headers added to every outbound INVITE through the termination.'
+                    title: Termination Headers
+                    type: object
+                  created_at:
+                    format: date-time
+                    title: Created At
+                    type: string
+                  updated_at:
+                    format: date-time
+                    title: Updated At
+                    type: string
+                required:
+                - phone_number_id
+                - workspace_id
+                - phone_number
+                - provider
+                - agent_id
+                - status
+                - created_at
+                - updated_at
+                type: object
+        '401':
+          description: No permission -- see authorization schemes
+          headers: {}
+          content:
+            application/json:
+              schema:
+                properties:
+                  status:
+                    title: Status
+                    type: integer
+                  message:
+                    title: Message
+                    type: string
+                  reason:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    title: Reason
+                required:
+                - status
+                - message
+                type: object
+        '404':
+          description: Nothing matches the given URI
+          headers: {}
+          content:
+            application/json:
+              schema:
+                properties:
+                  status:
+                    title: Status
+                    type: integer
+                  message:
+                    title: Message
+                    type: string
+                  reason:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    title: Reason
+                required:
+                - status
+                - message
+                type: object
+        '409':
+          description: Request conflict
+          headers: {}
+          content:
+            application/json:
+              schema:
+                properties:
+                  status:
+                    title: Status
+                    type: integer
+                  message:
+                    title: Message
+                    type: string
+                  reason:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    title: Reason
+                required:
+                - status
+                - message
+                type: object
+        '422':
+          description: ''
+          headers: {}
+          content:
+            application/json:
+              schema:
+                properties:
+                  status:
+                    title: Status
+                    type: integer
+                  message:
+                    title: Message
+                    type: string
+                  reason:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    title: Reason
+                required:
+                - status
+                - message
+                type: object
+        '503':
+          description: The server cannot process the request due to a high load
+          headers: {}
+          content:
+            application/json:
+              schema:
+                properties:
+                  status:
+                    title: Status
+                    type: integer
+                  message:
+                    title: Message
+                    type: string
+                  reason:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    title: Reason
+                required:
+                - status
+                - message
+                type: object
+      tags:
+      - Phone Numbers
+      operationId: patchV1AgentPhoneNumbersByPhoneNumberId
+      x-operation-id-source: derived
+    delete:
+      summary: Release Phone Number
+      description: 'Release a number back to the provider''s inventory and stop its daily
+
+        billing. This is irreversible: anyone — including other platforms — can
+
+        buy the number afterwards, so callers who saved it may reach a stranger.
+
+        The number disappears from this API immediately.'
+      security:
+      - BearerAuth: []
+      parameters:
+      - in: path
+        name: phone_number_id
+        description: ''
+        required: true
+        schema:
+          title: Phone Number Id
+          type: string
+        deprecated: false
+      responses:
+        '204':
+          description: Request fulfilled, nothing follows
+          headers: {}
+        '401':
+          description: No permission -- see authorization schemes
+          headers: {}
+          content:
+            application/json:
+              schema:
+                properties:
+                  status:
+                    title: Status
+                    type: integer
+                  message:
+                    title: Message
+                    type: string
+                  reason:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    title: Reason
+                required:
+                - status
+                - message
+                type: object
+        '404':
+          description: Nothing matches the given URI
+          headers: {}
+          content:
+            application/json:
+              schema:
+                properties:
+                  status:
+                    title: Status
+                    type: integer
+                  message:
+                    title: Message
+                    type: string
+                  reason:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    title: Reason
+                required:
+                - status
+                - message
+                type: object
+        '503':
+          description: The server cannot process the request due to a high load
+          headers: {}
+          content:
+            application/json:
+              schema:
+                properties:
+                  status:
+                    title: Status
+                    type: integer
+                  message:
+                    title: Message
+                    type: string
+                  reason:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    title: Reason
+                required:
+                - status
+                - message
+                type: object
+      tags:
+      - Phone Numbers
+      operationId: deleteV1AgentPhoneNumbersByPhoneNumberId
+      x-operation-id-source: derived
+components:
+  schemas:
+    PublicPhoneNumberUpdatePayload:
+      additionalProperties: false
+      properties:
+        label:
+          anyOf:
+          - maxLength: 120
+            type: string
+          - type: 'null'
+          default: null
+          title: Label
+        agent_id:
+          anyOf:
+          - type: string
+          - type: 'null'
+          default: null
+          description: Agent that answers this number's inbound calls. Explicit null unbinds; omit the field to keep the current binding.
+          title: Agent Id
+        transfer_caller_id:
+          anyOf:
+          - enum:
+            - agent_number
+            - original_caller
+            type: string
+          - type: 'null'
+          default: null
+          description: 'Managed `twilio` numbers only: the caller ID a transfer target sees, `agent_number` (this number) or `original_caller` (the caller''s own number). Applies to cold and warm transfers. It is a number setting, not agent config: no publish is needed and agent rollbacks leave it alone. Warm transfers follow it from the next call, cold transfers once `caller_id_sync_status` is `synced`. The deprecated boolean `cold_transfer_use_original_caller` is still accepted in its place.'
+          title: Transfer Caller Id
+        retry_caller_id_sync:
+          default: false
+          description: Re-apply the current caller ID policy after a failed synchronization.
+          title: Retry Caller Id Sync
+          type: boolean
+      title: PublicPhoneNumberUpdatePayload
+      type: object
+    PublicPhoneNumberPurchasePayload:
+      additionalProperties: false
+      properties:
+        provider:
+          const: twilio
+          description: '`twilio` buys from the managed inventory (supports call transfer); `sip` imports a number you already own at your carrier; see the `sip` request variant.'
+          title: Provider
+          type: string
+        phone_number:
+          description: E.164 number from `GET /v1/agent/available-phone-numbers`, e.g. +14155550123.
+          title: Phone Number
+          type: string
+        label:
+          default: ''
+          maxLength: 120
+          title: Label
+          type: string
+        agent_id:
+          anyOf:
+          - type: string
+          - type: 'null'
+          default: null
+          description: Bind an agent to answer inbound calls right away.
+          title: Agent Id
+      required:
+      - provider
+      - phone_number
+      title: PublicPhoneNumberPurchasePayload
+      type: object
+    PublicPhoneNumberEntity:
+      properties:
+        phone_number_id:
+          title: Phone Number Id
+          type: string
+        workspace_id:
+          title: Workspace Id
+          type: string
+        phone_number:
+          description: E.164, e.g. +14155550123.
+          title: Phone Number
+          type: string
+        provider:
+          enum:
+          - livekit
+          - twilio
+          - sip
+          title: Provider
+          type: string
+        label:
+          default: ''
+          title: Label
+          type: string
+        agent_id:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Inbound calls route to this agent; unbound numbers ring busy.
+          title: Agent Id
+        transfer_caller_id:
+          anyOf:
+          - enum:
+            - agent_number
+            - original_caller
+            type: string
+          - type: 'null'
+          default: null
+          description: 'Managed `twilio` numbers: the caller ID a transfer target sees, on cold and warm transfers alike. `agent_number` shows this number, `original_caller` shows the caller''s own number (a warm transfer falls back to this number when the caller withholds theirs). `null` for imported `sip` numbers, whose carrier decides.'
+          title: Transfer Caller Id
+        caller_id_sync_status:
+          default: carrier_managed
+          description: '`synced` once the carrier confirmed the policy, `pending` while it is being applied, `error` when the last attempt failed (send `retry_caller_id_sync`), `carrier_managed` for imported `sip` numbers.'
+          enum:
+          - synced
+          - pending
+          - error
+          - carrier_managed
+          title: Caller Id Sync Status
+          type: string
+        caller_id_sync_error:
+          default: ''
+          description: Why the last synchronization failed; empty otherwise.
+          title: Caller Id Sync Error
+          type: string
+        status:
+          enum:
+          - provisioning
+          - active
+          - error
+          - released
+          title: Status
+          type: string
+        status_detail:
+          default: ''
+          description: What failed when status is `error`; empty otherwise.
+          title: Status Detail
+          type: string
+        supports_outbound:
+          default: false
+          description: 'Whether the number can place calls (outbound and warm-transfer consult legs): managed `twilio` always, imported `sip` only when a termination was configured.'
+          title: Supports Outbound
+          type: boolean
+        termination_uri:
+          anyOf:
+          - type: string
+          - type: 'null'
+          default: null
+          description: 'Imported `sip` numbers: the customer trunk''s termination host.'
+          title: Termination Uri
+        inbound_auth_username:
+          anyOf:
+          - type: string
+          - type: 'null'
+          default: null
+          description: 'Imported `sip` numbers: the inbound digest username. Passwords are never echoed.'
+          title: Inbound Auth Username
+        inbound_allowed_addresses:
+          description: 'Imported `sip` numbers: allowed source IPs/CIDRs.'
+          items:
+            type: string
+          title: Inbound Allowed Addresses
+          type: array
+        termination_transport:
+          anyOf:
+          - type: string
+          - type: 'null'
+          default: null
+          description: 'Imported `sip` numbers: termination transport.'
+          title: Termination Transport
+        termination_auth_username:
+          anyOf:
+          - type: string
+          - type: 'null'
+          default: null
+          description: 'Imported `sip` numbers: the termination digest username. Passwords are never echoed.'
+          title: Termination Auth Username
+        termination_headers:
+          additionalProperties:
+            type: string
+          description: 'Imported `sip` numbers: custom SIP headers added to every outbound INVITE through the termination.'
+          title: Termination Headers
+          type: object
+        created_at:
+          format: date-time
+          title: Created At
+          type: string
+        updated_at:
+          format: date-time
+          title: Updated At
+          type: string
+      required:
+      - phone_number_id
+      - workspace_id
+      - phone_number
+      - provider
+      - agent_id
+      - status
+      - created_at
+      - updated_at
+      title: PublicPhoneNumberEntity
+      type: object
+    PublicSipNumberImportPayload:
+      additionalProperties: false
+      description: 'The `sip` variant of POST /v1/agent/phone-numbers: import a number that
+
+        stays at your carrier. Point your trunk''s origination at our SIP host,
+
+        give inbound at least one authentication factor (digest and/or source
+
+        CIDRs), and optionally a termination host + credentials (plus custom
+
+        `X-` headers for every outbound INVITE) so the number can place calls.
+
+        Nothing is rented: carrier charges stay on your account, and
+
+        imported numbers carry no telephony charges at all: no monthly fee, no
+
+        phone surcharge, no transfer fees; you pay agent minutes only.'
+      properties:
+        inbound_auth_username:
+          default: ''
+          maxLength: 128
+          title: Inbound Auth Username
+          type: string
+        inbound_auth_password:
+          default: ''
+          maxLength: 128
+          title: Inbound Auth Password
+          type: string
+        inbound_allowed_addresses:
+          items:
+            type: string
+          maxItems: 32
+          title: Inbound Allowed Addresses
+          type: array
+        termination_uri:
+          default: ''
+          title: Termination Uri
+          type: string
+        termination_transport:
+          default: auto
+          enum:
+          - auto
+          - udp
+          - tcp
+          - tls
+          title: Termination Transport
+          type: string
+        termination_auth_username:
+          default: ''
+          maxLength: 128
+          title: Termination Auth Username
+          type: string
+        termination_auth_password:
+          default: ''
+          maxLength: 128
+          title: Termination Auth Password
+          type: string
+        termination_headers:
+          additionalProperties:
+            type: string
+          title: Termination Headers
+          type: object
+        phone_number:
+          title: Phone Number
+          type: string
+        label:
+          default: ''
+          maxLength: 120
+          title: Label
+          type: string
+        agent_id:
+          anyOf:
+          - type: string
+          - type: 'null'
+          default: null
+          title: Agent Id
+        provider:
+          const: sip
+          title: Provider
+          type: string
+      required:
+      - phone_number
+      - provider
+      title: PublicSipNumberImportPayload
+      type: object
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer

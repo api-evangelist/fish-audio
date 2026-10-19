@@ -1,184 +1,1655 @@
 openapi: 3.2.0
 info:
-  title: Fish Audio Model API
-  description: Fish Audio is an AI voice platform offering text-to-speech, voice cloning, speech-to-text, and voice model management. Authentication is by API key issued at https://fish.audio/app/api-keys and presented as a Bearer token.
-  version: '1.0'
-  contact:
-    name: Fish Audio
-    url: https://docs.fish.audio
+  title: FishAudio Open Model API
+  version: '1'
 servers:
-- url: https://api.fish.audio
-  description: Production
-security:
-- bearerAuth: []
+- description: Fish Audio API
+  url: https://api.fish.audio
 tags:
 - name: Model
 paths:
   /model:
     get:
-      summary: List voice models
-      operationId: listModels
+      summary: List Models
+      security:
+      - BearerAuth: []
       parameters:
-      - name: page_size
-        in: query
+      - in: query
+        name: page_size
+        description: Page size
+        required: false
         schema:
+          default: 10
+          maximum: 100
+          minimum: 1
+          title: Page Size
           type: integer
-      - name: page_number
-        in: query
+        deprecated: false
+      - in: query
+        name: page_number
+        description: Page number
+        required: false
         schema:
+          default: 1
+          minimum: 1
+          title: Page Number
           type: integer
-      - name: title
-        in: query
+        deprecated: false
+      - in: query
+        name: title
+        description: Title to filter models
+        required: false
         schema:
-          type: string
-      - name: tag
-        in: query
+          anyOf:
+          - type: string
+          - type: 'null'
+          default: null
+          title: Title
+        deprecated: false
+      - in: query
+        name: tag
+        description: Tag to filter models
+        required: false
         schema:
-          type: string
-      - name: self
-        in: query
+          anyOf:
+          - items:
+              type: string
+            type: array
+          - type: string
+          - type: 'null'
+          default: null
+          title: Tag
+        deprecated: false
+      - in: query
+        name: self
+        description: If True, return models owned by the active workspace
+        required: false
         schema:
+          default: false
+          title: Self
           type: boolean
-      - name: author_id
-        in: query
+        deprecated: false
+      - in: query
+        name: author_id
+        description: Author ID to filter public models; ignored if self is True
+        required: false
         schema:
-          type: string
-      - name: language
-        in: query
+          anyOf:
+          - type: string
+          - type: 'null'
+          default: null
+          title: Author Id
+        deprecated: false
+      - in: query
+        name: language
+        description: Language to filter models
+        required: false
         schema:
-          type: string
-      - name: title_language
-        in: query
+          anyOf:
+          - items:
+              type: string
+            type: array
+          - type: string
+          - type: 'null'
+          default: null
+          title: Language
+        deprecated: false
+      - in: query
+        name: title_language
+        description: Title language to filter models
+        required: false
         schema:
-          type: string
-      - name: sort_by
-        in: query
+          anyOf:
+          - items:
+              type: string
+            type: array
+          - type: string
+          - type: 'null'
+          default: null
+          title: Title Language
+        deprecated: false
+      - in: query
+        name: licensed
+        description: If True, only voices licensed by Fish Audio (rights secured from the voice owner) are returned; ignored if self is True
+        required: false
         schema:
+          default: false
+          title: Licensed
+          type: boolean
+        deprecated: false
+      - in: query
+        name: sort_by
+        description: ''
+        required: false
+        schema:
+          default: score
+          enum:
+          - score
+          - task_count
+          - created_at
+          title: Sort By
           type: string
+        deprecated: false
       responses:
         '200':
-          description: Paginated model list
+          description: Request fulfilled, document follows
+          headers: {}
           content:
             application/json:
               schema:
+                properties:
+                  max_offset:
+                    anyOf:
+                    - type: integer
+                    - type: 'null'
+                    default: null
+                    title: Max Offset
+                  accessible_upper_bound:
+                    anyOf:
+                    - type: integer
+                    - type: 'null'
+                    default: null
+                    title: Accessible Upper Bound
+                  window_limited:
+                    default: false
+                    title: Window Limited
+                    type: boolean
+                  total_is_exact:
+                    default: true
+                    title: Total Is Exact
+                    type: boolean
+                  total:
+                    title: Total
+                    type: integer
+                  items:
+                    items:
+                      $ref: '#/components/schemas/ModelEntity'
+                    title: Items
+                    type: array
+                  has_more:
+                    anyOf:
+                    - type: boolean
+                    - type: 'null'
+                    default: null
+                    title: Has More
+                required:
+                - total
+                - items
                 type: object
       tags:
       - Model
-    post:
-      summary: Create a voice clone model
-      operationId: createModel
-      requestBody:
-        required: true
-        content:
-          multipart/form-data:
-            schema:
-              type: object
-              required:
-              - title
-              properties:
-                title:
-                  type: string
-                description:
-                  type: string
-                voices:
-                  type: array
-                  items:
-                    type: string
-                    format: binary
-                texts:
-                  type: array
-                  items:
-                    type: string
-                tags:
-                  type: array
-                  items:
-                    type: string
-                visibility:
-                  type: string
-                  enum:
-                  - public
-                  - unlist
-                  - private
-                cover_image:
-                  type: string
-                  format: binary
-      responses:
-        '200':
-          description: Created model
-          content:
-            application/json:
-              schema:
-                type: object
-      tags:
-      - Model
-  /model/{id}:
-    get:
-      summary: Get a voice model
       operationId: getModel
-      parameters:
-      - name: id
-        in: path
-        required: true
-        schema:
-          type: string
-      responses:
-        '200':
-          description: Model details
-          content:
-            application/json:
-              schema:
-                type: object
-      tags:
-      - Model
-    patch:
-      summary: Update a voice model
-      operationId: updateModel
-      parameters:
-      - name: id
-        in: path
-        required: true
-        schema:
-          type: string
+      x-operation-id-source: derived
+    post:
+      summary: Create Model for Users via API
+      security:
+      - BearerAuth: []
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              type: object
               properties:
+                visibility:
+                  default: private
+                  description: Model visibility. Public requests are downgraded to private; use the web publish flow to publish publicly. Unlist allows anyone with the link to access, while private is visible only to the creator.
+                  enum:
+                  - public
+                  - unlist
+                  - private
+                  title: Visibility
+                  type: string
+                type:
+                  const: tts
+                  description: Model type, tts is for text to speech
+                  title: Type
+                  type: string
                 title:
+                  description: Model title or name
+                  title: Title
                   type: string
                 description:
-                  type: string
+                  anyOf:
+                  - type: string
+                  - type: 'null'
+                  default: null
+                  description: Model description
+                  title: Description
                 cover_image:
-                  type: string
-                visibility:
-                  type: string
-                tags:
-                  type: array
-                  items:
+                  anyOf:
+                  - format: binary
                     type: string
+                  - type: 'null'
+                  default: null
+                  description: Model cover image, this is required if the model is public
+                  title: Cover Image
+                train_mode:
+                  const: fast
+                  description: Model train mode, for TTS model, fast means model instantly available after creation
+                  title: Train Mode
+                  type: string
+                voices:
+                  anyOf:
+                  - items:
+                      format: binary
+                      type: string
+                    maxItems: 20
+                    minItems: 1
+                    type: array
+                  - format: binary
+                    type: string
+                  description: Upload voices files that will be used to tune the model
+                  title: Voices
+                texts:
+                  anyOf:
+                  - items:
+                      type: string
+                    maxItems: 20
+                    type: array
+                  - type: string
+                  - type: 'null'
+                  default: null
+                  description: Texts corresponding to the voices, if unspecified, ASR will be performed on the voices
+                  title: Texts
+                voice_design_signatures:
+                  anyOf:
+                  - items:
+                      type: string
+                    type: array
+                  - type: string
+                  - type: 'null'
+                  default: null
+                  description: Signatures from /v1/voice-design candidates, one per voice in the same order. When every uploaded voice verifies, the model is stamped source=voice_design; an invalid signature rejects the request.
+                  title: Voice Design Signatures
+                tags:
+                  anyOf:
+                  - items:
+                      type: string
+                    type: array
+                  - type: string
+                  - type: 'null'
+                  description: Model tags
+                  title: Tags
+                enhance_audio_quality:
+                  default: true
+                  description: Enhance audio quality
+                  title: Enhance Audio Quality
+                  type: boolean
+                generate_sample:
+                  default: false
+                  description: Generate default text
+                  title: Generate Sample
+                  type: boolean
+              required:
+              - type
+              - title
+              - train_mode
+              - voices
+              type: object
+          application/x-www-form-urlencoded:
+            schema:
+              properties:
+                visibility:
+                  default: private
+                  description: Model visibility. Public requests are downgraded to private; use the web publish flow to publish publicly. Unlist allows anyone with the link to access, while private is visible only to the creator.
+                  enum:
+                  - public
+                  - unlist
+                  - private
+                  title: Visibility
+                  type: string
+                type:
+                  const: tts
+                  description: Model type, tts is for text to speech
+                  title: Type
+                  type: string
+                title:
+                  description: Model title or name
+                  title: Title
+                  type: string
+                description:
+                  anyOf:
+                  - type: string
+                  - type: 'null'
+                  default: null
+                  description: Model description
+                  title: Description
+                cover_image:
+                  anyOf:
+                  - format: binary
+                    type: string
+                  - type: 'null'
+                  default: null
+                  description: Model cover image, this is required if the model is public
+                  title: Cover Image
+                train_mode:
+                  const: fast
+                  description: Model train mode, for TTS model, fast means model instantly available after creation
+                  title: Train Mode
+                  type: string
+                voices:
+                  anyOf:
+                  - items:
+                      format: binary
+                      type: string
+                    maxItems: 20
+                    minItems: 1
+                    type: array
+                  - format: binary
+                    type: string
+                  description: Upload voices files that will be used to tune the model
+                  title: Voices
+                texts:
+                  anyOf:
+                  - items:
+                      type: string
+                    maxItems: 20
+                    type: array
+                  - type: string
+                  - type: 'null'
+                  default: null
+                  description: Texts corresponding to the voices, if unspecified, ASR will be performed on the voices
+                  title: Texts
+                voice_design_signatures:
+                  anyOf:
+                  - items:
+                      type: string
+                    type: array
+                  - type: string
+                  - type: 'null'
+                  default: null
+                  description: Signatures from /v1/voice-design candidates, one per voice in the same order. When every uploaded voice verifies, the model is stamped source=voice_design; an invalid signature rejects the request.
+                  title: Voice Design Signatures
+                tags:
+                  anyOf:
+                  - items:
+                      type: string
+                    type: array
+                  - type: string
+                  - type: 'null'
+                  description: Model tags
+                  title: Tags
+                enhance_audio_quality:
+                  default: true
+                  description: Enhance audio quality
+                  title: Enhance Audio Quality
+                  type: boolean
+                generate_sample:
+                  default: false
+                  description: Generate default text
+                  title: Generate Sample
+                  type: boolean
+              required:
+              - type
+              - title
+              - train_mode
+              - voices
+              type: object
+          multipart/form-data:
+            schema:
+              properties:
+                visibility:
+                  default: private
+                  description: Model visibility. Public requests are downgraded to private; use the web publish flow to publish publicly. Unlist allows anyone with the link to access, while private is visible only to the creator.
+                  enum:
+                  - public
+                  - unlist
+                  - private
+                  title: Visibility
+                  type: string
+                type:
+                  const: tts
+                  description: Model type, tts is for text to speech
+                  title: Type
+                  type: string
+                title:
+                  description: Model title or name
+                  title: Title
+                  type: string
+                description:
+                  anyOf:
+                  - type: string
+                  - type: 'null'
+                  default: null
+                  description: Model description
+                  title: Description
+                cover_image:
+                  anyOf:
+                  - format: binary
+                    type: string
+                  - type: 'null'
+                  default: null
+                  description: Model cover image, this is required if the model is public
+                  title: Cover Image
+                train_mode:
+                  const: fast
+                  description: Model train mode, for TTS model, fast means model instantly available after creation
+                  title: Train Mode
+                  type: string
+                voices:
+                  anyOf:
+                  - items:
+                      format: binary
+                      type: string
+                    maxItems: 20
+                    minItems: 1
+                    type: array
+                  - format: binary
+                    type: string
+                  description: Upload voices files that will be used to tune the model
+                  title: Voices
+                texts:
+                  anyOf:
+                  - items:
+                      type: string
+                    maxItems: 20
+                    type: array
+                  - type: string
+                  - type: 'null'
+                  default: null
+                  description: Texts corresponding to the voices, if unspecified, ASR will be performed on the voices
+                  title: Texts
+                voice_design_signatures:
+                  anyOf:
+                  - items:
+                      type: string
+                    type: array
+                  - type: string
+                  - type: 'null'
+                  default: null
+                  description: Signatures from /v1/voice-design candidates, one per voice in the same order. When every uploaded voice verifies, the model is stamped source=voice_design; an invalid signature rejects the request.
+                  title: Voice Design Signatures
+                tags:
+                  anyOf:
+                  - items:
+                      type: string
+                    type: array
+                  - type: string
+                  - type: 'null'
+                  description: Model tags
+                  title: Tags
+                enhance_audio_quality:
+                  default: true
+                  description: Enhance audio quality
+                  title: Enhance Audio Quality
+                  type: boolean
+                generate_sample:
+                  default: false
+                  description: Generate default text
+                  title: Generate Sample
+                  type: boolean
+              required:
+              - type
+              - title
+              - train_mode
+              - voices
+              type: object
+          application/msgpack:
+            schema:
+              properties:
+                visibility:
+                  default: private
+                  description: Model visibility. Public requests are downgraded to private; use the web publish flow to publish publicly. Unlist allows anyone with the link to access, while private is visible only to the creator.
+                  enum:
+                  - public
+                  - unlist
+                  - private
+                  title: Visibility
+                  type: string
+                type:
+                  const: tts
+                  description: Model type, tts is for text to speech
+                  title: Type
+                  type: string
+                title:
+                  description: Model title or name
+                  title: Title
+                  type: string
+                description:
+                  anyOf:
+                  - type: string
+                  - type: 'null'
+                  default: null
+                  description: Model description
+                  title: Description
+                cover_image:
+                  anyOf:
+                  - format: binary
+                    type: string
+                  - type: 'null'
+                  default: null
+                  description: Model cover image, this is required if the model is public
+                  title: Cover Image
+                train_mode:
+                  const: fast
+                  description: Model train mode, for TTS model, fast means model instantly available after creation
+                  title: Train Mode
+                  type: string
+                voices:
+                  anyOf:
+                  - items:
+                      format: binary
+                      type: string
+                    maxItems: 20
+                    minItems: 1
+                    type: array
+                  - format: binary
+                    type: string
+                  description: Upload voices files that will be used to tune the model
+                  title: Voices
+                texts:
+                  anyOf:
+                  - items:
+                      type: string
+                    maxItems: 20
+                    type: array
+                  - type: string
+                  - type: 'null'
+                  default: null
+                  description: Texts corresponding to the voices, if unspecified, ASR will be performed on the voices
+                  title: Texts
+                voice_design_signatures:
+                  anyOf:
+                  - items:
+                      type: string
+                    type: array
+                  - type: string
+                  - type: 'null'
+                  default: null
+                  description: Signatures from /v1/voice-design candidates, one per voice in the same order. When every uploaded voice verifies, the model is stamped source=voice_design; an invalid signature rejects the request.
+                  title: Voice Design Signatures
+                tags:
+                  anyOf:
+                  - items:
+                      type: string
+                    type: array
+                  - type: string
+                  - type: 'null'
+                  description: Model tags
+                  title: Tags
+                enhance_audio_quality:
+                  default: true
+                  description: Enhance audio quality
+                  title: Enhance Audio Quality
+                  type: boolean
+                generate_sample:
+                  default: false
+                  description: Generate default text
+                  title: Generate Sample
+                  type: boolean
+              required:
+              - type
+              - title
+              - train_mode
+              - voices
+              type: object
       responses:
-        '200':
-          description: Updated
+        '201':
+          description: Document created, URL follows
+          headers: {}
+          content:
+            application/json:
+              schema:
+                properties:
+                  _id:
+                    title: Id
+                    type: string
+                  type:
+                    enum:
+                    - svc
+                    - tts
+                    title: Type
+                    type: string
+                  title:
+                    title: Title
+                    type: string
+                  description:
+                    default: ''
+                    title: Description
+                    type: string
+                  cover_image:
+                    default: ''
+                    title: Cover Image
+                    type: string
+                  train_mode:
+                    default: full
+                    enum:
+                    - fast
+                    - full
+                    title: Train Mode
+                    type: string
+                  state:
+                    enum:
+                    - created
+                    - training
+                    - trained
+                    - failed
+                    title: State
+                    type: string
+                  tags:
+                    items:
+                      type: string
+                    title: Tags
+                    type: array
+                  samples:
+                    default: []
+                    items:
+                      $ref: '#/components/schemas/SampleEntity'
+                    title: Samples
+                    type: array
+                  created_at:
+                    format: date-time
+                    title: Created At
+                    type: string
+                  updated_at:
+                    format: date-time
+                    title: Updated At
+                    type: string
+                  languages:
+                    default: []
+                    items:
+                      type: string
+                    title: Languages
+                    type: array
+                  visibility:
+                    enum:
+                    - public
+                    - unlist
+                    - private
+                    title: Visibility
+                    type: string
+                  lock_visibility:
+                    default: false
+                    title: Lock Visibility
+                    type: boolean
+                  dmca_taken_down:
+                    anyOf:
+                    - type: boolean
+                    - type: 'null'
+                    default: false
+                    title: Dmca Taken Down
+                  takedown_category:
+                    anyOf:
+                    - enum:
+                      - dmca
+                      - policy
+                      type: string
+                    - type: 'null'
+                    default: null
+                    title: Takedown Category
+                  default_text:
+                    default: ''
+                    title: Default Text
+                    type: string
+                  source:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    title: Source
+                  licensed:
+                    default: false
+                    title: Licensed
+                    type: boolean
+                  pvc_release_state:
+                    anyOf:
+                    - enum:
+                      - released
+                      - retiring
+                      type: string
+                    - type: 'null'
+                    default: null
+                    title: Pvc Release State
+                  pvc_notice_period_months:
+                    anyOf:
+                    - type: integer
+                    - type: 'null'
+                    default: null
+                    title: Pvc Notice Period Months
+                  pvc_released_at:
+                    anyOf:
+                    - format: date-time
+                      type: string
+                    - type: 'null'
+                    default: null
+                    title: Pvc Released At
+                  pvc_retire_requested_at:
+                    anyOf:
+                    - format: date-time
+                      type: string
+                    - type: 'null'
+                    default: null
+                    title: Pvc Retire Requested At
+                  pvc_retire_effective_at:
+                    anyOf:
+                    - format: date-time
+                      type: string
+                    - type: 'null'
+                    default: null
+                    title: Pvc Retire Effective At
+                  quality:
+                    anyOf:
+                    - $ref: '#/components/schemas/ModelQualityEntity'
+                    - type: 'null'
+                    default: null
+                  like_count:
+                    title: Like Count
+                    type: integer
+                  mark_count:
+                    title: Mark Count
+                    type: integer
+                  shared_count:
+                    title: Shared Count
+                    type: integer
+                  task_count:
+                    title: Task Count
+                    type: integer
+                  unliked:
+                    default: false
+                    title: Unliked
+                    type: boolean
+                  liked:
+                    default: false
+                    title: Liked
+                    type: boolean
+                  marked:
+                    default: false
+                    title: Marked
+                    type: boolean
+                  author:
+                    $ref: '#/components/schemas/AuthorEntity'
+                required:
+                - _id
+                - type
+                - title
+                - state
+                - tags
+                - created_at
+                - updated_at
+                - visibility
+                - like_count
+                - mark_count
+                - shared_count
+                - task_count
+                - author
+                type: object
+        '401':
+          description: No permission -- see authorization schemes
+          headers: {}
+          content:
+            application/json:
+              schema:
+                properties:
+                  status:
+                    title: Status
+                    type: integer
+                  message:
+                    title: Message
+                    type: string
+                  reason:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    title: Reason
+                required:
+                - status
+                - message
+                type: object
+        '503':
+          description: The server cannot process the request due to a high load
+          headers: {}
+          content:
+            application/json:
+              schema:
+                properties:
+                  status:
+                    title: Status
+                    type: integer
+                  message:
+                    title: Message
+                    type: string
+                  reason:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    title: Reason
+                required:
+                - status
+                - message
+                type: object
       tags:
       - Model
-    delete:
-      summary: Delete a voice model
-      operationId: deleteModel
+      operationId: postModel
+      x-operation-id-source: derived
+  /model/{id}:
+    get:
+      summary: Get Model
+      security:
+      - BearerAuth: []
       parameters:
-      - name: id
-        in: path
+      - in: path
+        name: id
+        description: ''
         required: true
         schema:
+          title: Id
           type: string
+        deprecated: false
       responses:
         '200':
-          description: Deleted
+          description: Request fulfilled, document follows
+          headers: {}
+          content:
+            application/json:
+              schema:
+                properties:
+                  _id:
+                    title: Id
+                    type: string
+                  type:
+                    enum:
+                    - svc
+                    - tts
+                    title: Type
+                    type: string
+                  title:
+                    title: Title
+                    type: string
+                  description:
+                    default: ''
+                    title: Description
+                    type: string
+                  cover_image:
+                    default: ''
+                    title: Cover Image
+                    type: string
+                  train_mode:
+                    default: full
+                    enum:
+                    - fast
+                    - full
+                    title: Train Mode
+                    type: string
+                  state:
+                    enum:
+                    - created
+                    - training
+                    - trained
+                    - failed
+                    title: State
+                    type: string
+                  tags:
+                    items:
+                      type: string
+                    title: Tags
+                    type: array
+                  samples:
+                    default: []
+                    items:
+                      $ref: '#/components/schemas/SampleEntity'
+                    title: Samples
+                    type: array
+                  created_at:
+                    format: date-time
+                    title: Created At
+                    type: string
+                  updated_at:
+                    format: date-time
+                    title: Updated At
+                    type: string
+                  languages:
+                    default: []
+                    items:
+                      type: string
+                    title: Languages
+                    type: array
+                  visibility:
+                    enum:
+                    - public
+                    - unlist
+                    - private
+                    title: Visibility
+                    type: string
+                  lock_visibility:
+                    default: false
+                    title: Lock Visibility
+                    type: boolean
+                  dmca_taken_down:
+                    anyOf:
+                    - type: boolean
+                    - type: 'null'
+                    default: false
+                    title: Dmca Taken Down
+                  takedown_category:
+                    anyOf:
+                    - enum:
+                      - dmca
+                      - policy
+                      type: string
+                    - type: 'null'
+                    default: null
+                    title: Takedown Category
+                  default_text:
+                    default: ''
+                    title: Default Text
+                    type: string
+                  source:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    title: Source
+                  licensed:
+                    default: false
+                    title: Licensed
+                    type: boolean
+                  pvc_release_state:
+                    anyOf:
+                    - enum:
+                      - released
+                      - retiring
+                      type: string
+                    - type: 'null'
+                    default: null
+                    title: Pvc Release State
+                  pvc_notice_period_months:
+                    anyOf:
+                    - type: integer
+                    - type: 'null'
+                    default: null
+                    title: Pvc Notice Period Months
+                  pvc_released_at:
+                    anyOf:
+                    - format: date-time
+                      type: string
+                    - type: 'null'
+                    default: null
+                    title: Pvc Released At
+                  pvc_retire_requested_at:
+                    anyOf:
+                    - format: date-time
+                      type: string
+                    - type: 'null'
+                    default: null
+                    title: Pvc Retire Requested At
+                  pvc_retire_effective_at:
+                    anyOf:
+                    - format: date-time
+                      type: string
+                    - type: 'null'
+                    default: null
+                    title: Pvc Retire Effective At
+                  quality:
+                    anyOf:
+                    - $ref: '#/components/schemas/ModelQualityEntity'
+                    - type: 'null'
+                    default: null
+                  like_count:
+                    title: Like Count
+                    type: integer
+                  mark_count:
+                    title: Mark Count
+                    type: integer
+                  shared_count:
+                    title: Shared Count
+                    type: integer
+                  task_count:
+                    title: Task Count
+                    type: integer
+                  unliked:
+                    default: false
+                    title: Unliked
+                    type: boolean
+                  liked:
+                    default: false
+                    title: Liked
+                    type: boolean
+                  marked:
+                    default: false
+                    title: Marked
+                    type: boolean
+                  author:
+                    $ref: '#/components/schemas/AuthorEntity'
+                required:
+                - _id
+                - type
+                - title
+                - state
+                - tags
+                - created_at
+                - updated_at
+                - visibility
+                - like_count
+                - mark_count
+                - shared_count
+                - task_count
+                - author
+                type: object
+        '403':
+          description: Request forbidden -- authorization will not help
+          headers: {}
+          content:
+            application/json:
+              schema:
+                properties:
+                  status:
+                    title: Status
+                    type: integer
+                  message:
+                    title: Message
+                    type: string
+                  reason:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    title: Reason
+                required:
+                - status
+                - message
+                type: object
+        '404':
+          description: Nothing matches the given URI
+          headers: {}
+          content:
+            application/json:
+              schema:
+                properties:
+                  status:
+                    title: Status
+                    type: integer
+                  message:
+                    title: Message
+                    type: string
+                  reason:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    title: Reason
+                required:
+                - status
+                - message
+                type: object
       tags:
       - Model
+      operationId: getModelById
+      x-operation-id-source: derived
+    patch:
+      summary: Update Model
+      security:
+      - BearerAuth: []
+      parameters:
+      - in: path
+        name: id
+        description: ''
+        required: true
+        schema:
+          title: Id
+          type: string
+        deprecated: false
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              properties:
+                title:
+                  anyOf:
+                  - type: string
+                  - type: 'null'
+                  default: null
+                  title: Title
+                description:
+                  anyOf:
+                  - type: string
+                  - type: 'null'
+                  default: null
+                  title: Description
+                cover_image:
+                  anyOf:
+                  - format: binary
+                    type: string
+                  - type: 'null'
+                  default: null
+                  title: Cover Image
+                visibility:
+                  anyOf:
+                  - enum:
+                    - public
+                    - unlist
+                    - private
+                    type: string
+                  - type: 'null'
+                  default: null
+                  title: Visibility
+                tags:
+                  anyOf:
+                  - items:
+                      type: string
+                    type: array
+                  - type: string
+                  title: Tags
+              type: object
+          application/x-www-form-urlencoded:
+            schema:
+              properties:
+                title:
+                  anyOf:
+                  - type: string
+                  - type: 'null'
+                  default: null
+                  title: Title
+                description:
+                  anyOf:
+                  - type: string
+                  - type: 'null'
+                  default: null
+                  title: Description
+                cover_image:
+                  anyOf:
+                  - format: binary
+                    type: string
+                  - type: 'null'
+                  default: null
+                  title: Cover Image
+                visibility:
+                  anyOf:
+                  - enum:
+                    - public
+                    - unlist
+                    - private
+                    type: string
+                  - type: 'null'
+                  default: null
+                  title: Visibility
+                tags:
+                  anyOf:
+                  - items:
+                      type: string
+                    type: array
+                  - type: string
+                  title: Tags
+              type: object
+          multipart/form-data:
+            schema:
+              properties:
+                title:
+                  anyOf:
+                  - type: string
+                  - type: 'null'
+                  default: null
+                  title: Title
+                description:
+                  anyOf:
+                  - type: string
+                  - type: 'null'
+                  default: null
+                  title: Description
+                cover_image:
+                  anyOf:
+                  - format: binary
+                    type: string
+                  - type: 'null'
+                  default: null
+                  title: Cover Image
+                visibility:
+                  anyOf:
+                  - enum:
+                    - public
+                    - unlist
+                    - private
+                    type: string
+                  - type: 'null'
+                  default: null
+                  title: Visibility
+                tags:
+                  anyOf:
+                  - items:
+                      type: string
+                    type: array
+                  - type: string
+                  title: Tags
+              type: object
+          application/msgpack:
+            schema:
+              properties:
+                title:
+                  anyOf:
+                  - type: string
+                  - type: 'null'
+                  default: null
+                  title: Title
+                description:
+                  anyOf:
+                  - type: string
+                  - type: 'null'
+                  default: null
+                  title: Description
+                cover_image:
+                  anyOf:
+                  - format: binary
+                    type: string
+                  - type: 'null'
+                  default: null
+                  title: Cover Image
+                visibility:
+                  anyOf:
+                  - enum:
+                    - public
+                    - unlist
+                    - private
+                    type: string
+                  - type: 'null'
+                  default: null
+                  title: Visibility
+                tags:
+                  anyOf:
+                  - items:
+                      type: string
+                    type: array
+                  - type: string
+                  title: Tags
+              type: object
+      responses:
+        '200':
+          description: Request fulfilled, document follows
+          headers: {}
+        '401':
+          description: No permission -- see authorization schemes
+          headers: {}
+          content:
+            application/json:
+              schema:
+                properties:
+                  status:
+                    title: Status
+                    type: integer
+                  message:
+                    title: Message
+                    type: string
+                  reason:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    title: Reason
+                required:
+                - status
+                - message
+                type: object
+        '503':
+          description: The server cannot process the request due to a high load
+          headers: {}
+          content:
+            application/json:
+              schema:
+                properties:
+                  status:
+                    title: Status
+                    type: integer
+                  message:
+                    title: Message
+                    type: string
+                  reason:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    title: Reason
+                required:
+                - status
+                - message
+                type: object
+      tags:
+      - Model
+      operationId: patchModelById
+      x-operation-id-source: derived
+    delete:
+      summary: Delete Model
+      security:
+      - BearerAuth: []
+      parameters:
+      - in: path
+        name: id
+        description: ''
+        required: true
+        schema:
+          title: Id
+          type: string
+        deprecated: false
+      responses:
+        '200':
+          description: Request fulfilled, document follows
+          headers: {}
+        '401':
+          description: No permission -- see authorization schemes
+          headers: {}
+          content:
+            application/json:
+              schema:
+                properties:
+                  status:
+                    title: Status
+                    type: integer
+                  message:
+                    title: Message
+                    type: string
+                  reason:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    title: Reason
+                required:
+                - status
+                - message
+                type: object
+        '503':
+          description: The server cannot process the request due to a high load
+          headers: {}
+          content:
+            application/json:
+              schema:
+                properties:
+                  status:
+                    title: Status
+                    type: integer
+                  message:
+                    title: Message
+                    type: string
+                  reason:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    title: Reason
+                required:
+                - status
+                - message
+                type: object
+      tags:
+      - Model
+      operationId: deleteModelById
+      x-operation-id-source: derived
 components:
+  schemas:
+    ModelEntity:
+      properties:
+        _id:
+          title: Id
+          type: string
+        type:
+          enum:
+          - svc
+          - tts
+          title: Type
+          type: string
+        title:
+          title: Title
+          type: string
+        description:
+          default: ''
+          title: Description
+          type: string
+        cover_image:
+          default: ''
+          title: Cover Image
+          type: string
+        train_mode:
+          default: full
+          enum:
+          - fast
+          - full
+          title: Train Mode
+          type: string
+        state:
+          enum:
+          - created
+          - training
+          - trained
+          - failed
+          title: State
+          type: string
+        tags:
+          items:
+            type: string
+          title: Tags
+          type: array
+        samples:
+          default: []
+          items:
+            $ref: '#/components/schemas/SampleEntity'
+          title: Samples
+          type: array
+        created_at:
+          format: date-time
+          title: Created At
+          type: string
+        updated_at:
+          format: date-time
+          title: Updated At
+          type: string
+        languages:
+          default: []
+          items:
+            type: string
+          title: Languages
+          type: array
+        visibility:
+          enum:
+          - public
+          - unlist
+          - private
+          title: Visibility
+          type: string
+        lock_visibility:
+          default: false
+          title: Lock Visibility
+          type: boolean
+        dmca_taken_down:
+          anyOf:
+          - type: boolean
+          - type: 'null'
+          default: false
+          title: Dmca Taken Down
+        takedown_category:
+          anyOf:
+          - enum:
+            - dmca
+            - policy
+            type: string
+          - type: 'null'
+          default: null
+          title: Takedown Category
+        default_text:
+          default: ''
+          title: Default Text
+          type: string
+        source:
+          anyOf:
+          - type: string
+          - type: 'null'
+          default: null
+          title: Source
+        licensed:
+          default: false
+          title: Licensed
+          type: boolean
+        pvc_release_state:
+          anyOf:
+          - enum:
+            - released
+            - retiring
+            type: string
+          - type: 'null'
+          default: null
+          title: Pvc Release State
+        pvc_notice_period_months:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          default: null
+          title: Pvc Notice Period Months
+        pvc_released_at:
+          anyOf:
+          - format: date-time
+            type: string
+          - type: 'null'
+          default: null
+          title: Pvc Released At
+        pvc_retire_requested_at:
+          anyOf:
+          - format: date-time
+            type: string
+          - type: 'null'
+          default: null
+          title: Pvc Retire Requested At
+        pvc_retire_effective_at:
+          anyOf:
+          - format: date-time
+            type: string
+          - type: 'null'
+          default: null
+          title: Pvc Retire Effective At
+        quality:
+          anyOf:
+          - $ref: '#/components/schemas/ModelQualityEntity'
+          - type: 'null'
+          default: null
+        like_count:
+          title: Like Count
+          type: integer
+        mark_count:
+          title: Mark Count
+          type: integer
+        shared_count:
+          title: Shared Count
+          type: integer
+        task_count:
+          title: Task Count
+          type: integer
+        unliked:
+          default: false
+          title: Unliked
+          type: boolean
+        liked:
+          default: false
+          title: Liked
+          type: boolean
+        marked:
+          default: false
+          title: Marked
+          type: boolean
+        author:
+          $ref: '#/components/schemas/AuthorEntity'
+      required:
+      - _id
+      - type
+      - title
+      - state
+      - tags
+      - created_at
+      - updated_at
+      - visibility
+      - like_count
+      - mark_count
+      - shared_count
+      - task_count
+      - author
+      title: ModelEntity
+      type: object
+    SampleEntity:
+      properties:
+        title:
+          title: Title
+          type: string
+        text:
+          title: Text
+          type: string
+        task_id:
+          title: Task Id
+          type: string
+        audio:
+          title: Audio
+          type: string
+      required:
+      - title
+      - text
+      - task_id
+      - audio
+      title: SampleEntity
+      type: object
+    ModelAudioQualityEntity:
+      properties:
+        filename:
+          title: Filename
+          type: string
+        duration_ms:
+          title: Duration Ms
+          type: number
+        language:
+          default: unknown
+          title: Language
+          type: string
+        quality:
+          additionalProperties:
+            type: number
+          title: Quality
+          type: object
+        quality_passed:
+          default: false
+          title: Quality Passed
+          type: boolean
+        quality_reason:
+          default: ''
+          title: Quality Reason
+          type: string
+      required:
+      - filename
+      - duration_ms
+      title: ModelAudioQualityEntity
+      type: object
+    ModelQualityEntity:
+      properties:
+        audios:
+          items:
+            $ref: '#/components/schemas/ModelAudioQualityEntity'
+          title: Audios
+          type: array
+        created_at:
+          format: date-time
+          title: Created At
+          type: string
+        updated_at:
+          format: date-time
+          title: Updated At
+          type: string
+      required:
+      - created_at
+      - updated_at
+      title: ModelQualityEntity
+      type: object
+    AuthorEntity:
+      properties:
+        _id:
+          title: Id
+          type: string
+        nickname:
+          title: Nickname
+          type: string
+        avatar:
+          title: Avatar
+          type: string
+      required:
+      - _id
+      - nickname
+      - avatar
+      title: AuthorEntity
+      type: object
   securitySchemes:
-    bearerAuth:
+    BearerAuth:
       type: http
       scheme: bearer

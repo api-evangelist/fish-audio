@@ -1,0 +1,2317 @@
+openapi: 3.2.0
+info:
+  title: FishAudio Open Agent Sessions API
+  version: '1'
+servers:
+- description: Fish Audio API
+  url: https://api.fish.audio
+tags:
+- name: Agent Sessions
+paths:
+  /v1/agent/sessions:
+    get:
+      summary: List Agent Sessions
+      description: 'List your team''s sessions, newest first. Filter by agent, status, end
+
+        reason, caller number, SIP Call-ID, end user ID, or creation time.
+
+        Paginate with `cursor` (recommended; follow `next_cursor` while `has_more`
+
+        is true) or with `page` for offset pagination with a `total` count. The
+
+        two are mutually exclusive.'
+      security:
+      - BearerAuth: []
+      parameters:
+      - in: query
+        name: agent_id
+        description: ''
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          default: null
+          title: Agent Id
+        deprecated: false
+      - in: query
+        name: status
+        description: 'Comma-separated status filter (pending/active/completed/failed/unknown). Default: every status.'
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          default: null
+          title: Status
+        deprecated: false
+      - in: query
+        name: end_reason
+        description: Comma-separated end reason filter (user_hangup/agent_hangup/escalated/conversation_timeout/heartbeat_timeout/agent_join_timeout/internal_error/llm_endpoint_failure/room_join_timeout/cancelled/dial_failed).
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          default: null
+          title: End Reason
+        deprecated: false
+      - in: query
+        name: direction
+        description: Filter by call direction (inbound/outbound). Sessions predating the field count as inbound.
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          default: null
+          title: Direction
+        deprecated: false
+      - in: query
+        name: caller_number
+        description: Exact-match caller E.164 (phone sessions only).
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          default: null
+          title: Caller Number
+        deprecated: false
+      - in: query
+        name: sip_call_id
+        description: Exact-match SIP Call-ID of the call's INVITE, for looking up the session behind a carrier CDR entry (phone sessions only).
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          default: null
+          title: Sip Call Id
+        deprecated: false
+      - in: query
+        name: end_user_id
+        description: Exact-match end_user_id set at session creation.
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          default: null
+          title: End User Id
+        deprecated: false
+      - in: query
+        name: created_after
+        description: ''
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          default: null
+          title: Created After
+        deprecated: false
+      - in: query
+        name: created_before
+        description: ''
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          default: null
+          title: Created Before
+        deprecated: false
+      - in: query
+        name: cursor
+        description: ''
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          default: null
+          title: Cursor
+        deprecated: false
+      - in: query
+        name: page
+        description: 1-based page number (offset pagination). Returns total; mutually exclusive with cursor, which deep scans must use.
+        required: false
+        schema:
+          anyOf:
+          - minimum: 1
+            type: integer
+          - type: 'null'
+          default: null
+          title: Page
+        deprecated: false
+      - in: query
+        name: include_total
+        description: Also count the filtered set on the cursor path.
+        required: false
+        schema:
+          default: false
+          title: Include Total
+          type: boolean
+        deprecated: false
+      - in: query
+        name: page_size
+        description: ''
+        required: false
+        schema:
+          default: 30
+          maximum: 100
+          minimum: 1
+          title: Page Size
+          type: integer
+        deprecated: false
+      responses:
+        '200':
+          description: Request fulfilled, document follows
+          headers: {}
+          content:
+            application/json:
+              schema:
+                properties:
+                  sessions:
+                    items:
+                      $ref: '#/components/schemas/AgentSessionSummary'
+                    title: Sessions
+                    type: array
+                  has_more:
+                    title: Has More
+                    type: boolean
+                  next_cursor:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    title: Next Cursor
+                  total:
+                    anyOf:
+                    - type: integer
+                    - type: 'null'
+                    default: null
+                    title: Total
+                required:
+                - sessions
+                - has_more
+                type: object
+        '400':
+          description: Bad request syntax or unsupported method
+          headers: {}
+          content:
+            application/json:
+              schema:
+                properties:
+                  status:
+                    title: Status
+                    type: integer
+                  message:
+                    title: Message
+                    type: string
+                  reason:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    title: Reason
+                required:
+                - status
+                - message
+                type: object
+        '401':
+          description: No permission -- see authorization schemes
+          headers: {}
+          content:
+            application/json:
+              schema:
+                properties:
+                  status:
+                    title: Status
+                    type: integer
+                  message:
+                    title: Message
+                    type: string
+                  reason:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    title: Reason
+                required:
+                - status
+                - message
+                type: object
+        '503':
+          description: The server cannot process the request due to a high load
+          headers: {}
+          content:
+            application/json:
+              schema:
+                properties:
+                  status:
+                    title: Status
+                    type: integer
+                  message:
+                    title: Message
+                    type: string
+                  reason:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    title: Reason
+                required:
+                - status
+                - message
+                type: object
+      tags:
+      - Agent Sessions
+      operationId: getV1AgentSessions
+      x-operation-id-source: derived
+    post:
+      summary: Create Agent Session
+      description: 'Start a conversation session with an agent and receive a join token for the
+
+        session transport (currently LiveKit WebRTC). Authenticate with an API key to
+
+        start sessions with any agent in your team; without credentials only agents
+
+        published as public are reachable, and the request `Origin` must match the
+
+        agent''s allowed origins.
+
+
+        `language` (and `overrides.language`) accepts `en`, `ja`, `zh`, `ko`, `es`,
+
+        `fr`, `de`, `pt`, `it`, `nl`; anything else is 422. Omit it to use the agent''s configured
+
+        speaking language.
+
+
+        `overrides.asr.model` picks the speech recognition model for this session,
+
+        nested like the agent config''s `asr` section and with the same values as
+
+        `asr.model`. It needs an API key. A model in preview is 403 unless your
+
+        team has access or the agent already uses it.'
+      security:
+      - BearerAuth: []
+      parameters:
+      - in: header
+        name: origin
+        description: ''
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          default: null
+          title: Origin
+        deprecated: false
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AgentSessionCreatePayload'
+      responses:
+        '201':
+          description: Document created, URL follows
+          headers: {}
+          content:
+            application/json:
+              schema:
+                description: Wire twin of @fishaudio/agent-protocol `SessionToken` (session.ts); keep in sync.
+                properties:
+                  session_id:
+                    title: Session Id
+                    type: string
+                  expires_at:
+                    title: Expires At
+                    type: string
+                  max_duration_seconds:
+                    title: Max Duration Seconds
+                    type: integer
+                  transport:
+                    const: livekit
+                    title: Transport
+                    type: string
+                  livekit_url:
+                    title: Livekit Url
+                    type: string
+                  token:
+                    title: Token
+                    type: string
+                required:
+                - session_id
+                - expires_at
+                - max_duration_seconds
+                - transport
+                - livekit_url
+                - token
+                type: object
+        '400':
+          description: Bad request syntax or unsupported method
+          headers: {}
+          content:
+            application/json:
+              schema:
+                properties:
+                  status:
+                    title: Status
+                    type: integer
+                  message:
+                    title: Message
+                    type: string
+                  reason:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    title: Reason
+                required:
+                - status
+                - message
+                type: object
+        '401':
+          description: No permission -- see authorization schemes
+          headers: {}
+          content:
+            application/json:
+              schema:
+                properties:
+                  status:
+                    title: Status
+                    type: integer
+                  message:
+                    title: Message
+                    type: string
+                  reason:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    title: Reason
+                required:
+                - status
+                - message
+                type: object
+        '402':
+          description: No payment -- see charging schemes
+          headers: {}
+          content:
+            application/json:
+              schema:
+                properties:
+                  status:
+                    title: Status
+                    type: integer
+                  message:
+                    title: Message
+                    type: string
+                  reason:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    title: Reason
+                required:
+                - status
+                - message
+                type: object
+        '403':
+          description: Request forbidden -- authorization will not help
+          headers: {}
+          content:
+            application/json:
+              schema:
+                properties:
+                  status:
+                    title: Status
+                    type: integer
+                  message:
+                    title: Message
+                    type: string
+                  reason:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    title: Reason
+                required:
+                - status
+                - message
+                type: object
+        '404':
+          description: Nothing matches the given URI
+          headers: {}
+          content:
+            application/json:
+              schema:
+                properties:
+                  status:
+                    title: Status
+                    type: integer
+                  message:
+                    title: Message
+                    type: string
+                  reason:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    title: Reason
+                required:
+                - status
+                - message
+                type: object
+        '409':
+          description: Request conflict
+          headers: {}
+          content:
+            application/json:
+              schema:
+                properties:
+                  status:
+                    title: Status
+                    type: integer
+                  message:
+                    title: Message
+                    type: string
+                  reason:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    title: Reason
+                required:
+                - status
+                - message
+                type: object
+        '429':
+          description: The user has sent too many requests in a given amount of time ("rate limiting")
+          headers: {}
+          content:
+            application/json:
+              schema:
+                properties:
+                  status:
+                    title: Status
+                    type: integer
+                  message:
+                    title: Message
+                    type: string
+                  reason:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    title: Reason
+                required:
+                - status
+                - message
+                type: object
+        '502':
+          description: Invalid responses from another server/proxy
+          headers: {}
+          content:
+            application/json:
+              schema:
+                properties:
+                  status:
+                    title: Status
+                    type: integer
+                  message:
+                    title: Message
+                    type: string
+                  reason:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    title: Reason
+                required:
+                - status
+                - message
+                type: object
+        '503':
+          description: The server cannot process the request due to a high load
+          headers: {}
+          content:
+            application/json:
+              schema:
+                properties:
+                  status:
+                    title: Status
+                    type: integer
+                  message:
+                    title: Message
+                    type: string
+                  reason:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    title: Reason
+                required:
+                - status
+                - message
+                type: object
+      tags:
+      - Agent Sessions
+      x-codeSamples:
+      - lang: bash
+        label: Create Session
+        source: "curl --request POST \\\n  --url https://api.fish.audio/v1/agent/sessions \\\n  --header 'Authorization: Bearer <token>' \\\n  --header 'Content-Type: application/json' \\\n  --data '{\n    \"agent_id\": \"<agent-id>\"\n  }'"
+      operationId: postV1AgentSessions
+      x-operation-id-source: derived
+  /v1/agent/sessions/{session_id}:
+    get:
+      summary: Get Agent Session
+      description: 'Fetch one session''s full detail: status, timing, and the conversation
+
+        timeline (transcript turns interleaved with tool calls, in order).'
+      security:
+      - BearerAuth: []
+      parameters:
+      - in: path
+        name: session_id
+        description: ''
+        required: true
+        schema:
+          title: Session Id
+          type: string
+        deprecated: false
+      responses:
+        '200':
+          description: Request fulfilled, document follows
+          headers: {}
+          content:
+            application/json:
+              schema:
+                properties:
+                  session_id:
+                    title: Session Id
+                    type: string
+                  agent_id:
+                    title: Agent Id
+                    type: string
+                  agent_name:
+                    title: Agent Name
+                    type: string
+                  name:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    title: Name
+                  end_user_id:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    title: End User Id
+                  status:
+                    enum:
+                    - pending
+                    - active
+                    - completed
+                    - failed
+                    - unknown
+                    title: Status
+                    type: string
+                  end_reason:
+                    anyOf:
+                    - enum:
+                      - user_hangup
+                      - agent_hangup
+                      - escalated
+                      - conversation_timeout
+                      - heartbeat_timeout
+                      - agent_join_timeout
+                      - internal_error
+                      - llm_endpoint_failure
+                      - room_join_timeout
+                      - cancelled
+                      - dial_failed
+                      type: string
+                    - type: 'null'
+                    default: null
+                    title: End Reason
+                  source:
+                    enum:
+                    - api_key
+                    - dashboard
+                    - public
+                    - phone
+                    title: Source
+                    type: string
+                  direction:
+                    default: inbound
+                    enum:
+                    - inbound
+                    - outbound
+                    title: Direction
+                    type: string
+                  dial_status:
+                    anyOf:
+                    - enum:
+                      - answered
+                      - busy
+                      - no_answer
+                      - failed
+                      type: string
+                    - type: 'null'
+                    default: null
+                    title: Dial Status
+                  answered_by:
+                    anyOf:
+                    - enum:
+                      - human
+                      - voicemail
+                      - unknown
+                      type: string
+                    - type: 'null'
+                    default: null
+                    title: Answered By
+                  caller_number:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    title: Caller Number
+                  dialed_number:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    title: Dialed Number
+                  sip_call_id:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    title: Sip Call Id
+                  timezone:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    title: Timezone
+                  created_at:
+                    title: Created At
+                    type: string
+                  started_at:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    title: Started At
+                  ended_at:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    title: Ended At
+                  duration_seconds:
+                    anyOf:
+                    - type: integer
+                    - type: 'null'
+                    default: null
+                    title: Duration Seconds
+                  participant_identity:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    title: Participant Identity
+                  agent_participant_identity:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    title: Agent Participant Identity
+                  agent_joined_at:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    title: Agent Joined At
+                  metadata:
+                    additionalProperties:
+                      $ref: '#/components/schemas/JsonValue'
+                    title: Metadata
+                    type: object
+                  content_purged_at:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    title: Content Purged At
+                  keypad_menu:
+                    anyOf:
+                    - $ref: '#/components/schemas/AgentSessionKeypadMenu'
+                    - type: 'null'
+                    default: null
+                  unattributed_llm_usage:
+                    items:
+                      $ref: '#/components/schemas/LLMMessageUsage'
+                    title: Unattributed Llm Usage
+                    type: array
+                  items:
+                    items:
+                      discriminator:
+                        mapping:
+                          message: '#/components/schemas/AgentSessionMessageItem'
+                          tool_call: '#/components/schemas/AgentSessionToolCallItem'
+                          tool_result: '#/components/schemas/AgentSessionToolResultItem'
+                          transfer: '#/components/schemas/AgentSessionTransferItem'
+                        propertyName: type
+                      oneOf:
+                      - $ref: '#/components/schemas/AgentSessionMessageItem'
+                      - $ref: '#/components/schemas/AgentSessionToolCallItem'
+                      - $ref: '#/components/schemas/AgentSessionTransferItem'
+                      - $ref: '#/components/schemas/AgentSessionToolResultItem'
+                    title: Items
+                    type: array
+                  analysis:
+                    anyOf:
+                    - $ref: '#/components/schemas/AgentSessionAnalysisResult'
+                    - type: 'null'
+                    default: null
+                required:
+                - session_id
+                - agent_id
+                - agent_name
+                - status
+                - source
+                - created_at
+                type: object
+        '401':
+          description: No permission -- see authorization schemes
+          headers: {}
+          content:
+            application/json:
+              schema:
+                properties:
+                  status:
+                    title: Status
+                    type: integer
+                  message:
+                    title: Message
+                    type: string
+                  reason:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    title: Reason
+                required:
+                - status
+                - message
+                type: object
+        '404':
+          description: Nothing matches the given URI
+          headers: {}
+          content:
+            application/json:
+              schema:
+                properties:
+                  status:
+                    title: Status
+                    type: integer
+                  message:
+                    title: Message
+                    type: string
+                  reason:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    title: Reason
+                required:
+                - status
+                - message
+                type: object
+        '502':
+          description: Invalid responses from another server/proxy
+          headers: {}
+          content:
+            application/json:
+              schema:
+                properties:
+                  status:
+                    title: Status
+                    type: integer
+                  message:
+                    title: Message
+                    type: string
+                  reason:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    title: Reason
+                required:
+                - status
+                - message
+                type: object
+        '503':
+          description: The server cannot process the request due to a high load
+          headers: {}
+          content:
+            application/json:
+              schema:
+                properties:
+                  status:
+                    title: Status
+                    type: integer
+                  message:
+                    title: Message
+                    type: string
+                  reason:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    title: Reason
+                required:
+                - status
+                - message
+                type: object
+      tags:
+      - Agent Sessions
+      operationId: getV1AgentSessionsBySessionId
+      x-operation-id-source: derived
+  /v1/agent/sessions/{session_id}/recording:
+    get:
+      summary: Get Agent Session Recording
+      description: 'Return time-limited download URLs for the session''s audio recording, one
+
+        per speaker track (agent and user are recorded separately).'
+      security:
+      - BearerAuth: []
+      parameters:
+      - in: path
+        name: session_id
+        description: ''
+        required: true
+        schema:
+          title: Session Id
+          type: string
+        deprecated: false
+      responses:
+        '200':
+          description: Request fulfilled, document follows
+          headers: {}
+          content:
+            application/json:
+              schema:
+                properties:
+                  session_id:
+                    title: Session Id
+                    type: string
+                  status:
+                    enum:
+                    - processing
+                    - complete
+                    - failed
+                    title: Status
+                    type: string
+                  tracks:
+                    items:
+                      $ref: '#/components/schemas/AgentSessionRecordingTrackEntity'
+                    title: Tracks
+                    type: array
+                  transfers:
+                    items:
+                      $ref: '#/components/schemas/AgentSessionTransferRecordingEntity'
+                    title: Transfers
+                    type: array
+                  error:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    title: Error
+                  error_code:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    title: Error Code
+                  error_message:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    title: Error Message
+                required:
+                - session_id
+                - status
+                - tracks
+                type: object
+        '401':
+          description: No permission -- see authorization schemes
+          headers: {}
+          content:
+            application/json:
+              schema:
+                properties:
+                  status:
+                    title: Status
+                    type: integer
+                  message:
+                    title: Message
+                    type: string
+                  reason:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    title: Reason
+                required:
+                - status
+                - message
+                type: object
+        '404':
+          description: Nothing matches the given URI
+          headers: {}
+          content:
+            application/json:
+              schema:
+                properties:
+                  status:
+                    title: Status
+                    type: integer
+                  message:
+                    title: Message
+                    type: string
+                  reason:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    title: Reason
+                required:
+                - status
+                - message
+                type: object
+        '410':
+          description: URI no longer exists and has been permanently removed
+          headers: {}
+          content:
+            application/json:
+              schema:
+                properties:
+                  status:
+                    title: Status
+                    type: integer
+                  message:
+                    title: Message
+                    type: string
+                  reason:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    title: Reason
+                required:
+                - status
+                - message
+                type: object
+        '502':
+          description: Invalid responses from another server/proxy
+          headers: {}
+          content:
+            application/json:
+              schema:
+                properties:
+                  status:
+                    title: Status
+                    type: integer
+                  message:
+                    title: Message
+                    type: string
+                  reason:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    title: Reason
+                required:
+                - status
+                - message
+                type: object
+        '503':
+          description: The server cannot process the request due to a high load
+          headers: {}
+          content:
+            application/json:
+              schema:
+                properties:
+                  status:
+                    title: Status
+                    type: integer
+                  message:
+                    title: Message
+                    type: string
+                  reason:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    title: Reason
+                required:
+                - status
+                - message
+                type: object
+      tags:
+      - Agent Sessions
+      operationId: getV1AgentSessionsBySessionIdRecording
+      x-operation-id-source: derived
+  /v1/agent/sessions/{session_id}/end:
+    post:
+      summary: End Agent Session
+      description: 'Hang up a live session: the agent disconnects and the call terminates. The
+
+        session record, transcript, and recording are retained and stay readable.'
+      security:
+      - BearerAuth: []
+      parameters:
+      - in: path
+        name: session_id
+        description: ''
+        required: true
+        schema:
+          title: Session Id
+          type: string
+        deprecated: false
+      responses:
+        '204':
+          description: Request fulfilled, nothing follows
+          headers: {}
+        '401':
+          description: No permission -- see authorization schemes
+          headers: {}
+          content:
+            application/json:
+              schema:
+                properties:
+                  status:
+                    title: Status
+                    type: integer
+                  message:
+                    title: Message
+                    type: string
+                  reason:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    title: Reason
+                required:
+                - status
+                - message
+                type: object
+        '404':
+          description: Nothing matches the given URI
+          headers: {}
+          content:
+            application/json:
+              schema:
+                properties:
+                  status:
+                    title: Status
+                    type: integer
+                  message:
+                    title: Message
+                    type: string
+                  reason:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    title: Reason
+                required:
+                - status
+                - message
+                type: object
+        '502':
+          description: Invalid responses from another server/proxy
+          headers: {}
+          content:
+            application/json:
+              schema:
+                properties:
+                  status:
+                    title: Status
+                    type: integer
+                  message:
+                    title: Message
+                    type: string
+                  reason:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    title: Reason
+                required:
+                - status
+                - message
+                type: object
+        '503':
+          description: The server cannot process the request due to a high load
+          headers: {}
+          content:
+            application/json:
+              schema:
+                properties:
+                  status:
+                    title: Status
+                    type: integer
+                  message:
+                    title: Message
+                    type: string
+                  reason:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    title: Reason
+                required:
+                - status
+                - message
+                type: object
+      tags:
+      - Agent Sessions
+      x-codeSamples:
+      - lang: bash
+        label: End Session
+        source: "curl --request POST \\\n  --url https://api.fish.audio/v1/agent/sessions/<session-id>/end \\\n  --header 'Authorization: Bearer <token>'"
+      operationId: postV1AgentSessionsBySessionIdEnd
+      x-operation-id-source: derived
+components:
+  schemas:
+    AgentSessionAsrOverridesPayload:
+      additionalProperties: false
+      description: Per-session subset of the agent config's asr section, same field names.
+      properties:
+        model:
+          anyOf:
+          - enum:
+            - deepgram:nova-3
+            - elevenlabs:scribe_v2_realtime
+            - elevenlabs:scribe_v2_medical
+            - fish_audio:transcribe-1-pro-realtime
+            type: string
+          - type: 'null'
+          default: null
+          description: Speech recognition model for this session, same values as the agent's `asr.model`. A model in preview is refused with 403 unless your team has access or the agent already uses it.
+          title: Model
+      title: AgentSessionAsrOverridesPayload
+      type: object
+    AgentSessionTransferRecordingEntity:
+      description: 'A warm transfer''s consult call, recorded apart from the caller, who
+
+        was on hold meanwhile. `transfer_id` is the transfer item''s `call_id`.'
+      properties:
+        transfer_id:
+          title: Transfer Id
+          type: string
+        status:
+          enum:
+          - processing
+          - complete
+          - failed
+          title: Status
+          type: string
+        tracks:
+          items:
+            $ref: '#/components/schemas/AgentSessionRecordingTrackEntity'
+          title: Tracks
+          type: array
+      required:
+      - transfer_id
+      - status
+      - tracks
+      title: AgentSessionTransferRecordingEntity
+      type: object
+    AgentSessionCreatePayload:
+      additionalProperties: false
+      properties:
+        agent_id:
+          title: Agent Id
+          type: string
+        name:
+          anyOf:
+          - maxLength: 128
+            type: string
+          - type: 'null'
+          default: null
+          title: Name
+        timezone:
+          anyOf:
+          - maxLength: 64
+            type: string
+          - type: 'null'
+          default: null
+          description: IANA timezone (like `Asia/Tokyo`) for the agent's sense of local date and time in this session. Overrides the agent's configured timezone, which defaults to UTC. Invalid names are rejected with 422.
+          title: Timezone
+        client_timezone:
+          anyOf:
+          - maxLength: 64
+            type: string
+          - type: 'null'
+          default: null
+          description: 'The end user''s device timezone as an IANA name (like `Asia/Tokyo`), used as a fallback hint: it applies only when neither `timezone` nor the agent''s configured timezone is set, and invalid values are ignored rather than rejected. The Web SDK fills it automatically from the browser for public agents. When your backend creates the session, forward the value from your client.'
+          title: Client Timezone
+        world_context:
+          default: true
+          title: World Context
+          type: boolean
+        overrides:
+          anyOf:
+          - $ref: '#/components/schemas/AgentSessionOverridesPayload'
+          - type: 'null'
+          default: null
+        dynamic_variables:
+          anyOf:
+          - additionalProperties:
+              anyOf:
+              - type: string
+              - type: integer
+              - type: number
+              - type: boolean
+            maxProperties: 500
+            type: object
+          - type: 'null'
+          default: null
+          title: Dynamic Variables
+        end_user_id:
+          anyOf:
+          - maxLength: 256
+            type: string
+          - type: 'null'
+          default: null
+          description: Your identifier for the end user, stored verbatim. Returned on session reads and webhooks, and filterable with `GET /v1/agent/sessions?end_user_id=`.
+          title: End User Id
+        metadata:
+          anyOf:
+          - additionalProperties:
+              $ref: '#/components/schemas/JsonValue'
+            type: object
+          - type: 'null'
+          default: null
+          title: Metadata
+        llm_extra_body:
+          anyOf:
+          - additionalProperties:
+              $ref: '#/components/schemas/JsonValue'
+            type: object
+          - type: 'null'
+          default: null
+          title: Llm Extra Body
+        tool_events:
+          default: true
+          title: Tool Events
+          type: boolean
+        record_audio:
+          anyOf:
+          - type: boolean
+          - type: 'null'
+          default: null
+          title: Record Audio
+      required:
+      - agent_id
+      title: AgentSessionCreatePayload
+      type: object
+    LLMMessageTokenCost:
+      properties:
+        model:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Model
+        rate_version:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Rate Version
+        category:
+          enum:
+          - input
+          - cache_read
+          - cache_write_5m
+          - cache_write_1h
+          - output
+          title: Category
+          type: string
+        tokens:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Tokens
+        rate_per_million:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Rate Per Million
+        cost_usd:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Cost Usd
+      required:
+      - model
+      - rate_version
+      - category
+      - tokens
+      - rate_per_million
+      - cost_usd
+      title: LLMMessageTokenCost
+      type: object
+    AgentSessionRecordingTrackEntity:
+      properties:
+        role:
+          enum:
+          - agent
+          - user
+          - human
+          title: Role
+          type: string
+        status:
+          enum:
+          - requested
+          - active
+          - complete
+          - failed
+          title: Status
+          type: string
+        url:
+          anyOf:
+          - type: string
+          - type: 'null'
+          default: null
+          title: Url
+        expires_at:
+          anyOf:
+          - format: date-time
+            type: string
+          - type: 'null'
+          default: null
+          title: Expires At
+        duration_ms:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          default: null
+          title: Duration Ms
+        started_at:
+          anyOf:
+          - format: date-time
+            type: string
+          - type: 'null'
+          default: null
+          title: Started At
+        ended_at:
+          anyOf:
+          - format: date-time
+            type: string
+          - type: 'null'
+          default: null
+          title: Ended At
+        error:
+          anyOf:
+          - type: string
+          - type: 'null'
+          default: null
+          title: Error
+        error_code:
+          anyOf:
+          - type: string
+          - type: 'null'
+          default: null
+          title: Error Code
+      required:
+      - role
+      - status
+      title: AgentSessionRecordingTrackEntity
+      type: object
+    AgentSessionToolResultItem:
+      description: 'Tool outcome (`tool.completed`/`tool.failed` twin). A call that never
+
+        resolved (session died mid-flight) has no result item.'
+      properties:
+        type:
+          const: tool_result
+          default: tool_result
+          title: Type
+          type: string
+        call_id:
+          title: Call Id
+          type: string
+        tool_name:
+          title: Tool Name
+          type: string
+        tool_source:
+          anyOf:
+          - type: string
+          - type: 'null'
+          default: null
+          title: Tool Source
+        status:
+          enum:
+          - completed
+          - failed
+          title: Status
+          type: string
+        output:
+          anyOf:
+          - type: string
+          - type: 'null'
+          default: null
+          title: Output
+        output_truncated:
+          default: false
+          title: Output Truncated
+          type: boolean
+        error:
+          anyOf:
+          - type: string
+          - type: 'null'
+          default: null
+          title: Error
+        latency_ms:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          default: null
+          title: Latency Ms
+        turn_id:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          default: null
+          title: Turn Id
+        created_at:
+          anyOf:
+          - type: string
+          - type: 'null'
+          default: null
+          title: Created At
+      required:
+      - call_id
+      - tool_name
+      - status
+      title: AgentSessionToolResultItem
+      type: object
+    AgentSessionOverridesPayload:
+      additionalProperties: false
+      description: 'Wire twin of @fishaudio/agent-protocol `SessionOverrides` (session.ts).
+
+
+        Every field must be allow-listed in Agent.overrides_allowed; unauthorized
+
+        fields fail session creation loudly rather than being silently dropped.'
+      properties:
+        first_message:
+          anyOf:
+          - maxLength: 10000
+            type: string
+          - type: 'null'
+          default: null
+          title: First Message
+        first_message_prompt:
+          anyOf:
+          - maxLength: 10000
+            type: string
+          - type: 'null'
+          default: null
+          title: First Message Prompt
+        system_prompt:
+          anyOf:
+          - maxLength: 500000
+            type: string
+          - type: 'null'
+          default: null
+          description: Limited to 32000 tokens (o200k_base), same budget as the configured prompt it replaces.
+          title: System Prompt
+        voice_id:
+          anyOf:
+          - maxLength: 256
+            type: string
+          - type: 'null'
+          default: null
+          title: Voice Id
+        language:
+          anyOf:
+          - enum:
+            - en
+            - ja
+            - zh
+            - ko
+            - es
+            - fr
+            - de
+            - pt
+            - it
+            - nl
+            - ar
+            - hi
+            - id
+            - tr
+            - ru
+            - bg
+            - sr
+            - hr
+            - cs
+            - sk
+            - pl
+            - uk
+            - ro
+            - hu
+            - el
+            - sv
+            - da
+            - 'no'
+            - fi
+            - et
+            - lv
+            - lt
+            - ca
+            - he
+            - fa
+            - ur
+            - kk
+            - ka
+            - hy
+            - bn
+            - ta
+            - te
+            - kn
+            - mr
+            - gu
+            - pa
+            - ne
+            - th
+            - vi
+            - ms
+            - tl
+            - af
+            type: string
+          - type: 'null'
+          default: null
+          title: Language
+        asr:
+          anyOf:
+          - $ref: '#/components/schemas/AgentSessionAsrOverridesPayload'
+          - type: 'null'
+          default: null
+      title: AgentSessionOverridesPayload
+      type: object
+    AgentSessionKeypadMenu:
+      description: 'How the keypad menu of an inbound phone call ended. `outcome` is
+
+        `selected` when the caller chose an option, `no_input` or `no_match`
+
+        when no attempt got a valid choice (the last one had no input, or input
+
+        matching no option), and `skipped` when the menu could not run (a resumed
+
+        conversation or no SIP caller). `value` is what the menu variable
+
+        received: the chosen option''s value, or the fallback value when the
+
+        caller never made a valid choice.'
+      properties:
+        outcome:
+          enum:
+          - selected
+          - no_input
+          - no_match
+          - skipped
+          title: Outcome
+          type: string
+        variable:
+          title: Variable
+          type: string
+        value:
+          title: Value
+          type: string
+        key:
+          anyOf:
+          - type: string
+          - type: 'null'
+          default: null
+          title: Key
+        input:
+          anyOf:
+          - enum:
+            - dtmf
+            - speech
+            type: string
+          - type: 'null'
+          default: null
+          title: Input
+        attempts:
+          default: 0
+          title: Attempts
+          type: integer
+        completed_at:
+          anyOf:
+          - format: date-time
+            type: string
+          - type: 'null'
+          default: null
+          title: Completed At
+      required:
+      - outcome
+      - variable
+      - value
+      title: AgentSessionKeypadMenu
+      type: object
+    LLMMessageUsage:
+      properties:
+        message_generation_id:
+          anyOf:
+          - type: string
+          - type: 'null'
+          default: null
+          title: Message Generation Id
+        turn_id:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          default: null
+          title: Turn Id
+        status:
+          enum:
+          - complete
+          - pending
+          - unavailable
+          title: Status
+          type: string
+        billing_mode:
+          enum:
+          - tokens
+          - included
+          - legacy
+          title: Billing Mode
+          type: string
+        call_count:
+          default: 0
+          title: Call Count
+          type: integer
+        usage_complete:
+          default: false
+          title: Usage Complete
+          type: boolean
+        call_ids:
+          items:
+            type: string
+          title: Call Ids
+          type: array
+        cost_usd:
+          anyOf:
+          - type: string
+          - type: 'null'
+          default: null
+          title: Cost Usd
+        billable_cost_usd:
+          anyOf:
+          - type: string
+          - type: 'null'
+          default: null
+          title: Billable Cost Usd
+        known_cost_usd:
+          default: '0'
+          title: Known Cost Usd
+          type: string
+        tokens:
+          items:
+            $ref: '#/components/schemas/LLMMessageTokenCost'
+          title: Tokens
+          type: array
+      required:
+      - status
+      - billing_mode
+      title: LLMMessageUsage
+      type: object
+    AgentSessionAnalysisResult:
+      description: 'Public trim of the post-call analysis record: outcomes only, no run
+
+        internals (model, tokens, config hash).'
+      properties:
+        status:
+          enum:
+          - queued
+          - running
+          - completed
+          - skipped
+          - error
+          title: Status
+          type: string
+        summary:
+          anyOf:
+          - type: string
+          - type: 'null'
+          default: null
+          title: Summary
+        data:
+          items:
+            $ref: '#/components/schemas/AgentSessionAnalysisDataValue'
+          title: Data
+          type: array
+        criteria_results:
+          items:
+            $ref: '#/components/schemas/AgentSessionAnalysisCriterionResult'
+          title: Criteria Results
+          type: array
+      required:
+      - status
+      title: AgentSessionAnalysisResult
+      type: object
+    AgentSessionMessageItem:
+      description: One transcript message; system messages never surface here.
+      properties:
+        id:
+          anyOf:
+          - type: string
+          - type: 'null'
+          default: null
+          title: Id
+        runtime_message_id:
+          anyOf:
+          - type: string
+          - type: 'null'
+          default: null
+          title: Runtime Message Id
+        message_generation_id:
+          anyOf:
+          - type: string
+          - type: 'null'
+          default: null
+          title: Message Generation Id
+        llm_usage:
+          anyOf:
+          - $ref: '#/components/schemas/LLMMessageUsage'
+          - type: 'null'
+          default: null
+        type:
+          const: message
+          default: message
+          title: Type
+          type: string
+        role:
+          enum:
+          - user
+          - assistant
+          title: Role
+          type: string
+        content:
+          title: Content
+          type: string
+        input_medium:
+          anyOf:
+          - const: dtmf
+            type: string
+          - type: 'null'
+          default: null
+          title: Input Medium
+        turn_id:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          default: null
+          title: Turn Id
+        created_at:
+          anyOf:
+          - type: string
+          - type: 'null'
+          default: null
+          title: Created At
+      required:
+      - role
+      - content
+      title: AgentSessionMessageItem
+      type: object
+    AgentSessionTransferMessage:
+      description: 'One line of a warm transfer''s private consult call: `assistant` is the
+
+        agent briefing, `transfer_target` the person it dialed.'
+      properties:
+        role:
+          enum:
+          - assistant
+          - transfer_target
+          title: Role
+          type: string
+        content:
+          title: Content
+          type: string
+        created_at:
+          anyOf:
+          - type: string
+          - type: 'null'
+          default: null
+          title: Created At
+      required:
+      - role
+      - content
+      title: AgentSessionTransferMessage
+      type: object
+    AgentSessionToolCallItem:
+      description: 'Tool invocation, mirroring the realtime `tool.started` event; `call_id`
+
+        matches the SDK event''s callId, so live UIs and history line up.'
+      properties:
+        type:
+          const: tool_call
+          default: tool_call
+          title: Type
+          type: string
+        call_id:
+          title: Call Id
+          type: string
+        tool_name:
+          title: Tool Name
+          type: string
+        tool_source:
+          anyOf:
+          - type: string
+          - type: 'null'
+          default: null
+          title: Tool Source
+        input:
+          title: Input
+          type: string
+        turn_id:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          default: null
+          title: Turn Id
+        created_at:
+          anyOf:
+          - type: string
+          - type: 'null'
+          default: null
+          title: Created At
+      required:
+      - call_id
+      - tool_name
+      - input
+      title: AgentSessionToolCallItem
+      type: object
+    AgentSessionAnalysisDataValue:
+      properties:
+        name:
+          title: Name
+          type: string
+        type:
+          enum:
+          - boolean
+          - text
+          - number
+          - enum
+          title: Type
+          type: string
+        value:
+          anyOf:
+          - type: boolean
+          - type: number
+          - type: string
+          - type: 'null'
+          default: null
+          title: Value
+        rationale:
+          default: ''
+          title: Rationale
+          type: string
+      required:
+      - name
+      - type
+      title: AgentSessionAnalysisDataValue
+      type: object
+    AgentSessionTransferItem:
+      description: 'One transfer attempt. `call_id` matches its `_transfer_call` tool_call
+
+        item. A warm transfer''s consult call (the caller on hold meanwhile) is in
+
+        `messages`, never in the caller''s message items. `merged` and `referred`
+
+        succeeded, and `outcome` is null while the attempt runs.'
+      properties:
+        type:
+          const: transfer
+          default: transfer
+          title: Type
+          type: string
+        call_id:
+          title: Call Id
+          type: string
+        destination:
+          title: Destination
+          type: string
+        destination_type:
+          enum:
+          - phone
+          - sip
+          title: Destination Type
+          type: string
+        target:
+          title: Target
+          type: string
+        mode:
+          enum:
+          - cold
+          - warm
+          title: Mode
+          type: string
+        warm_connect:
+          anyOf:
+          - enum:
+            - confirm
+            - briefing
+            - direct
+            type: string
+          - type: 'null'
+          default: null
+          title: Warm Connect
+        outcome:
+          anyOf:
+          - enum:
+            - merged
+            - referred
+            - dial_failed
+            - declined
+            - voicemail
+            - ivr
+            - consult_closed
+            - consult_timeout
+            - merge_failed
+            - refer_failed
+            - caller_hangup
+            - cancelled
+            - unavailable
+            type: string
+          - type: 'null'
+          default: null
+          title: Outcome
+        sip_status:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          default: null
+          description: 'dial_failed and refer_failed: the final SIP response code the carrier gave. Null when it gave none.'
+          title: Sip Status
+        dial_status:
+          anyOf:
+          - enum:
+            - busy
+            - no_answer
+            - failed
+            type: string
+          - type: 'null'
+          default: null
+          description: 'dial_failed and refer_failed: why the transfer target could not be reached, classified from sip_status the same way as an outbound call''s dial_status.'
+          title: Dial Status
+        decline_reason:
+          anyOf:
+          - type: string
+          - type: 'null'
+          default: null
+          description: 'declined: the agent''s summary of why the transfer target declined. Null when none was given. What they actually said is in messages.'
+          title: Decline Reason
+        consult_end_reason:
+          anyOf:
+          - enum:
+            - transfer_target_hangup
+            - connection_lost
+            type: string
+          - type: 'null'
+          default: null
+          description: 'consult_closed: how the consult call ended before the caller was connected. Null when it cannot be told.'
+          title: Consult End Reason
+        hold_started_at:
+          anyOf:
+          - type: string
+          - type: 'null'
+          default: null
+          title: Hold Started At
+        hold_ended_at:
+          anyOf:
+          - type: string
+          - type: 'null'
+          default: null
+          title: Hold Ended At
+        dial_started_at:
+          anyOf:
+          - type: string
+          - type: 'null'
+          default: null
+          title: Dial Started At
+        answered_at:
+          anyOf:
+          - type: string
+          - type: 'null'
+          default: null
+          title: Answered At
+        ended_at:
+          anyOf:
+          - type: string
+          - type: 'null'
+          default: null
+          title: Ended At
+        transferred_call_ended_at:
+          anyOf:
+          - type: string
+          - type: 'null'
+          default: null
+          description: 'merged and referred: when the call between the caller and the transfer target ended. Null while it is still on. A cold transfer waits for the carrier''s call record (up to about an hour) and stays null on imported SIP numbers.'
+          title: Transferred Call Ended At
+        transferred_call_duration_seconds:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          default: null
+          description: 'merged and referred: how long the caller talked with the transfer target. Warm: from ended_at to transferred_call_ended_at. Cold: the carrier''s call record, 0 when the target never really answered.'
+          title: Transferred Call Duration Seconds
+        transferred_call_end_reason:
+          anyOf:
+          - enum:
+            - caller_hangup
+            - transfer_target_hangup
+            - conversation_timeout
+            - connection_lost
+            type: string
+          - type: 'null'
+          default: null
+          description: 'merged: how the call between the caller and the transfer target ended. caller_hangup: the caller hung up (on an outbound call, the person the agent called). transfer_target_hangup: the transfer target hung up. conversation_timeout: the call reached the agent''s maximum call duration, counted from the start of the call. connection_lost: a line dropped, nobody hung up. Null when it cannot be told, and always null on a cold transfer.'
+          title: Transferred Call End Reason
+        messages:
+          items:
+            $ref: '#/components/schemas/AgentSessionTransferMessage'
+          title: Messages
+          type: array
+        created_at:
+          anyOf:
+          - type: string
+          - type: 'null'
+          default: null
+          title: Created At
+      required:
+      - call_id
+      - destination
+      - destination_type
+      - target
+      - mode
+      title: AgentSessionTransferItem
+      type: object
+    AgentSessionAnalysisCriterionResult:
+      properties:
+        name:
+          title: Name
+          type: string
+        result:
+          enum:
+          - success
+          - failure
+          - unknown
+          title: Result
+          type: string
+        rationale:
+          default: ''
+          title: Rationale
+          type: string
+      required:
+      - name
+      - result
+      title: AgentSessionAnalysisCriterionResult
+      type: object
+    JsonValue: {}
+    AgentSessionSummary:
+      description: 'One list row: lifecycle facts only — the conversation timeline lives on
+
+        the detail endpoint (Retell-style thin list).'
+      properties:
+        session_id:
+          title: Session Id
+          type: string
+        agent_id:
+          title: Agent Id
+          type: string
+        agent_name:
+          title: Agent Name
+          type: string
+        name:
+          anyOf:
+          - type: string
+          - type: 'null'
+          default: null
+          title: Name
+        end_user_id:
+          anyOf:
+          - type: string
+          - type: 'null'
+          default: null
+          title: End User Id
+        status:
+          enum:
+          - pending
+          - active
+          - completed
+          - failed
+          - unknown
+          title: Status
+          type: string
+        end_reason:
+          anyOf:
+          - enum:
+            - user_hangup
+            - agent_hangup
+            - escalated
+            - conversation_timeout
+            - heartbeat_timeout
+            - agent_join_timeout
+            - internal_error
+            - llm_endpoint_failure
+            - room_join_timeout
+            - cancelled
+            - dial_failed
+            type: string
+          - type: 'null'
+          default: null
+          title: End Reason
+        source:
+          enum:
+          - api_key
+          - dashboard
+          - public
+          - phone
+          title: Source
+          type: string
+        direction:
+          default: inbound
+          enum:
+          - inbound
+          - outbound
+          title: Direction
+          type: string
+        dial_status:
+          anyOf:
+          - enum:
+            - answered
+            - busy
+            - no_answer
+            - failed
+            type: string
+          - type: 'null'
+          default: null
+          title: Dial Status
+        answered_by:
+          anyOf:
+          - enum:
+            - human
+            - voicemail
+            - unknown
+            type: string
+          - type: 'null'
+          default: null
+          title: Answered By
+        caller_number:
+          anyOf:
+          - type: string
+          - type: 'null'
+          default: null
+          title: Caller Number
+        dialed_number:
+          anyOf:
+          - type: string
+          - type: 'null'
+          default: null
+          title: Dialed Number
+        sip_call_id:
+          anyOf:
+          - type: string
+          - type: 'null'
+          default: null
+          title: Sip Call Id
+        timezone:
+          anyOf:
+          - type: string
+          - type: 'null'
+          default: null
+          title: Timezone
+        created_at:
+          title: Created At
+          type: string
+        started_at:
+          anyOf:
+          - type: string
+          - type: 'null'
+          default: null
+          title: Started At
+        ended_at:
+          anyOf:
+          - type: string
+          - type: 'null'
+          default: null
+          title: Ended At
+        duration_seconds:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          default: null
+          title: Duration Seconds
+        participant_identity:
+          anyOf:
+          - type: string
+          - type: 'null'
+          default: null
+          title: Participant Identity
+        agent_participant_identity:
+          anyOf:
+          - type: string
+          - type: 'null'
+          default: null
+          title: Agent Participant Identity
+        agent_joined_at:
+          anyOf:
+          - type: string
+          - type: 'null'
+          default: null
+          title: Agent Joined At
+        metadata:
+          additionalProperties:
+            $ref: '#/components/schemas/JsonValue'
+          title: Metadata
+          type: object
+        content_purged_at:
+          anyOf:
+          - type: string
+          - type: 'null'
+          default: null
+          title: Content Purged At
+        keypad_menu:
+          anyOf:
+          - $ref: '#/components/schemas/AgentSessionKeypadMenu'
+          - type: 'null'
+          default: null
+      required:
+      - session_id
+      - agent_id
+      - agent_name
+      - status
+      - source
+      - created_at
+      title: AgentSessionSummary
+      type: object
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer

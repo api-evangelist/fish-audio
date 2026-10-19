@@ -1,0 +1,12 @@
+{
+ "url": "https://api.fish.audio/openapi.json",
+ "final": "https://api.fish.audio/openapi.json",
+ "status": 200,
+ "content_type": "application/json",
+ "bytes": 387562,
+ "sha256": "bd58cd220f53d1c9982432c6ba951feae5f1ca40b820418c1d4d9ccc55c2a198",
+ "fetched_at": "2026-10-19",
+ "fetched_by": "APIEvangelist-Harvest/1.0 (+https://apievangelist.com)",
+ "match": "byte-identical",
+ "note": "re-archived: the provider's current document replaced a stale archive (roadmap#793); the old files are in openapi/_superseded/2026-10-19-stale"
+}

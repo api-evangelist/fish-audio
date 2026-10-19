@@ -1,68 +1,333 @@
 openapi: 3.2.0
 info:
-  title: Fish Audio Wallet API
-  description: Fish Audio is an AI voice platform offering text-to-speech, voice cloning, speech-to-text, and voice model management. Authentication is by API key issued at https://fish.audio/app/api-keys and presented as a Bearer token.
-  version: '1.0'
-  contact:
-    name: Fish Audio
-    url: https://docs.fish.audio
+  title: FishAudio Open Wallet API
+  version: '1'
 servers:
-- url: https://api.fish.audio
-  description: Production
-security:
-- bearerAuth: []
+- description: Fish Audio API
+  url: https://api.fish.audio
 tags:
 - name: Wallet
 paths:
   /wallet/{user_id}/package:
     get:
-      summary: Get user package / balance / subscription
-      operationId: getUserPackage
+      summary: Get User Package
+      security:
+      - BearerAuth: []
       parameters:
-      - name: user_id
-        in: path
-        required: true
+      - in: path
+        name: user_id
+        description: User ID or 'self'
+        required: false
         schema:
-          type: string
           default: self
+          title: User Id
+          type: string
+        deprecated: false
       responses:
         '200':
-          description: Package payload
+          description: Request fulfilled, document follows
+          headers: {}
           content:
             application/json:
               schema:
+                properties:
+                  user_id:
+                    title: User Id
+                    type: string
+                  type:
+                    title: Type
+                    type: string
+                  total:
+                    title: Total
+                    type: integer
+                  balance:
+                    title: Balance
+                    type: integer
+                  created_at:
+                    format: date-time
+                    title: Created At
+                    type: string
+                  updated_at:
+                    format: date-time
+                    title: Updated At
+                    type: string
+                  finished_at:
+                    format: date-time
+                    title: Finished At
+                    type: string
+                  anchor_day:
+                    anyOf:
+                    - type: integer
+                    - type: 'null'
+                    default: null
+                    description: UTC day of month used for credit refreshes; clamp to the month's last day. Missing/null falls back to updated_at's UTC day.
+                    title: Anchor Day
+                  stripe_subscription_id:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    title: Stripe Subscription Id
+                  stripe_price_id:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    title: Stripe Price Id
+                  billing_period:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    title: Billing Period
+                  current_period_end:
+                    anyOf:
+                    - format: date-time
+                      type: string
+                    - type: 'null'
+                    default: null
+                    title: Current Period End
+                  cancel_at_period_end:
+                    anyOf:
+                    - type: boolean
+                    - type: 'null'
+                    default: null
+                    title: Cancel At Period End
+                  cancel_at:
+                    anyOf:
+                    - format: date-time
+                      type: string
+                    - type: 'null'
+                    default: null
+                    title: Cancel At
+                  scheduled_change:
+                    anyOf:
+                    - additionalProperties: true
+                      type: object
+                    - type: 'null'
+                    default: null
+                    title: Scheduled Change
+                  last_synced_at:
+                    anyOf:
+                    - format: date-time
+                      type: string
+                    - type: 'null'
+                    default: null
+                    title: Last Synced At
+                  subscription_currency:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    title: Subscription Currency
+                  subscription_status:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    title: Subscription Status
+                  extra_balance:
+                    anyOf:
+                    - type: integer
+                    - type: 'null'
+                    default: 0
+                    title: Extra Balance
+                  has_used_trial:
+                    default: false
+                    title: Has Used Trial
+                    type: boolean
+                required:
+                - user_id
+                - type
+                - total
+                - balance
+                - created_at
+                - updated_at
+                - finished_at
+                type: object
+        '401':
+          description: No permission -- see authorization schemes
+          headers: {}
+          content:
+            application/json:
+              schema:
+                properties:
+                  status:
+                    title: Status
+                    type: integer
+                  message:
+                    title: Message
+                    type: string
+                  reason:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    title: Reason
+                required:
+                - status
+                - message
+                type: object
+        '503':
+          description: The server cannot process the request due to a high load
+          headers: {}
+          content:
+            application/json:
+              schema:
+                properties:
+                  status:
+                    title: Status
+                    type: integer
+                  message:
+                    title: Message
+                    type: string
+                  reason:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    title: Reason
+                required:
+                - status
+                - message
                 type: object
       tags:
       - Wallet
+      operationId: getWalletByUserIdPackage
+      x-operation-id-source: derived
   /wallet/{user_id}/api-credit:
     get:
-      summary: Get API credit balance
-      operationId: getApiCredit
+      summary: Get API Credit
+      security:
+      - BearerAuth: []
       parameters:
-      - name: user_id
-        in: path
-        required: true
+      - in: query
+        name: check_free_credit
+        description: ''
+        required: false
         schema:
-          type: string
-      - name: check_free_credit
-        in: query
-        schema:
+          default: false
+          title: Check Free Credit
           type: boolean
-      - name: team_id
-        in: query
+        deprecated: false
+      - in: query
+        name: team_id
+        description: ''
+        required: false
         schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          default: null
+          title: Team Id
+        deprecated: false
+      - in: path
+        name: user_id
+        description: User ID or 'self'
+        required: false
+        schema:
+          default: self
+          title: User Id
           type: string
+        deprecated: false
       responses:
         '200':
-          description: Credit details
+          description: Request fulfilled, document follows
+          headers: {}
           content:
             application/json:
               schema:
+                properties:
+                  _id:
+                    title: Id
+                    type: string
+                  user_id:
+                    title: User Id
+                    type: string
+                  credit:
+                    title: Credit
+                    type: string
+                  cumulative_top_up:
+                    title: Cumulative Top Up
+                    type: string
+                  created_at:
+                    format: date-time
+                    title: Created At
+                    type: string
+                  updated_at:
+                    format: date-time
+                    title: Updated At
+                    type: string
+                  has_phone_sha256:
+                    title: Has Phone Sha256
+                    type: boolean
+                  has_free_credit:
+                    anyOf:
+                    - type: boolean
+                    - type: 'null'
+                    default: null
+                    title: Has Free Credit
+                required:
+                - _id
+                - user_id
+                - credit
+                - cumulative_top_up
+                - created_at
+                - updated_at
+                - has_phone_sha256
+                type: object
+        '401':
+          description: No permission -- see authorization schemes
+          headers: {}
+          content:
+            application/json:
+              schema:
+                properties:
+                  status:
+                    title: Status
+                    type: integer
+                  message:
+                    title: Message
+                    type: string
+                  reason:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    title: Reason
+                required:
+                - status
+                - message
+                type: object
+        '503':
+          description: The server cannot process the request due to a high load
+          headers: {}
+          content:
+            application/json:
+              schema:
+                properties:
+                  status:
+                    title: Status
+                    type: integer
+                  message:
+                    title: Message
+                    type: string
+                  reason:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    title: Reason
+                required:
+                - status
+                - message
                 type: object
       tags:
       - Wallet
+      operationId: getWalletByUserIdApiCredit
+      x-operation-id-source: derived
 components:
   securitySchemes:
-    bearerAuth:
+    BearerAuth:
       type: http
       scheme: bearer

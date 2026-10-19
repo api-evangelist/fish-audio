@@ -1,0 +1,1479 @@
+openapi: 3.2.0
+info:
+  title: FishAudio Open Agent Tools API
+  version: '1'
+servers:
+- description: Fish Audio API
+  url: https://api.fish.audio
+tags:
+- name: Agent Tools
+paths:
+  /v1/agent/tools:
+    get:
+      summary: List Tools
+      description: 'List your team''s tools, newest first. Filter with `agent_id` to see one
+
+        agent''s attached tools. Paginate with `cursor` (follow `next_cursor` while
+
+        `has_more` is true) or with `page` for offset pagination with a `total`
+
+        count — the two are mutually exclusive.'
+      security:
+      - BearerAuth: []
+      parameters:
+      - in: query
+        name: search
+        description: Case-insensitive match on name.
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          default: null
+          title: Search
+        deprecated: false
+      - in: query
+        name: agent_id
+        description: Only tools attached to this agent's draft config.
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          default: null
+          title: Agent Id
+        deprecated: false
+      - in: query
+        name: cursor
+        description: ''
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          default: null
+          title: Cursor
+        deprecated: false
+      - in: query
+        name: page
+        description: 1-based page number; mutually exclusive with cursor.
+        required: false
+        schema:
+          anyOf:
+          - minimum: 1
+            type: integer
+          - type: 'null'
+          default: null
+          title: Page
+        deprecated: false
+      - in: query
+        name: include_total
+        description: ''
+        required: false
+        schema:
+          default: false
+          title: Include Total
+          type: boolean
+        deprecated: false
+      - in: query
+        name: page_size
+        description: ''
+        required: false
+        schema:
+          default: 30
+          maximum: 100
+          minimum: 1
+          title: Page Size
+          type: integer
+        deprecated: false
+      responses:
+        '200':
+          description: Request fulfilled, document follows
+          headers: {}
+          content:
+            application/json:
+              schema:
+                properties:
+                  tools:
+                    items:
+                      $ref: '#/components/schemas/PublicAgentToolSummary'
+                    title: Tools
+                    type: array
+                  has_more:
+                    title: Has More
+                    type: boolean
+                  next_cursor:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    title: Next Cursor
+                  total:
+                    anyOf:
+                    - type: integer
+                    - type: 'null'
+                    default: null
+                    title: Total
+                required:
+                - tools
+                - has_more
+                type: object
+        '400':
+          description: Bad request syntax or unsupported method
+          headers: {}
+          content:
+            application/json:
+              schema:
+                properties:
+                  status:
+                    title: Status
+                    type: integer
+                  message:
+                    title: Message
+                    type: string
+                  reason:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    title: Reason
+                required:
+                - status
+                - message
+                type: object
+        '401':
+          description: No permission -- see authorization schemes
+          headers: {}
+          content:
+            application/json:
+              schema:
+                properties:
+                  status:
+                    title: Status
+                    type: integer
+                  message:
+                    title: Message
+                    type: string
+                  reason:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    title: Reason
+                required:
+                - status
+                - message
+                type: object
+        '404':
+          description: Nothing matches the given URI
+          headers: {}
+          content:
+            application/json:
+              schema:
+                properties:
+                  status:
+                    title: Status
+                    type: integer
+                  message:
+                    title: Message
+                    type: string
+                  reason:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    title: Reason
+                required:
+                - status
+                - message
+                type: object
+        '503':
+          description: The server cannot process the request due to a high load
+          headers: {}
+          content:
+            application/json:
+              schema:
+                properties:
+                  status:
+                    title: Status
+                    type: integer
+                  message:
+                    title: Message
+                    type: string
+                  reason:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    title: Reason
+                required:
+                - status
+                - message
+                type: object
+      tags:
+      - Agent Tools
+      operationId: getV1AgentTools
+      x-operation-id-source: derived
+    post:
+      summary: Create Tool
+      description: 'Create a workspace tool. `tool_type: webhook` calls your HTTP endpoint
+
+        during conversations; `tool_type: client` is executed by your own frontend
+
+        through the SDK (no URL). Attach it to agents via the agent config''s
+
+        `tools.tool_ids`. Credential headers (authorization_bearer /
+
+        authorization_basic) are write-only and read back as `has_secret`.'
+      security:
+      - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PublicAgentToolCreatePayload'
+      responses:
+        '201':
+          description: Document created, URL follows
+          headers: {}
+          content:
+            application/json:
+              schema:
+                properties:
+                  tool_id:
+                    title: Tool Id
+                    type: string
+                  workspace_id:
+                    title: Workspace Id
+                    type: string
+                  name:
+                    title: Name
+                    type: string
+                  description:
+                    default: ''
+                    title: Description
+                    type: string
+                  tool_type:
+                    enum:
+                    - webhook
+                    - client
+                    title: Tool Type
+                    type: string
+                  method:
+                    enum:
+                    - GET
+                    - POST
+                    - PUT
+                    - PATCH
+                    - DELETE
+                    title: Method
+                    type: string
+                  url:
+                    title: Url
+                    type: string
+                  used_by:
+                    default: 0
+                    description: How many agents reference this tool in their draft configuration.
+                    title: Used By
+                    type: integer
+                  created_at:
+                    format: date-time
+                    title: Created At
+                    type: string
+                  updated_at:
+                    format: date-time
+                    title: Updated At
+                    type: string
+                  arguments:
+                    items:
+                      $ref: '#/components/schemas/AgentWebhookArgumentPayload'
+                    title: Arguments
+                    type: array
+                  content_type:
+                    title: Content Type
+                    type: string
+                  body_template:
+                    default: ''
+                    title: Body Template
+                    type: string
+                  headers:
+                    items:
+                      $ref: '#/components/schemas/PublicToolHeader'
+                    title: Headers
+                    type: array
+                  timeout_seconds:
+                    title: Timeout Seconds
+                    type: integer
+                  error_handling:
+                    enum:
+                    - passthrough
+                    - hide
+                    title: Error Handling
+                    type: string
+                  mock_responses:
+                    items:
+                      $ref: '#/components/schemas/AgentWebhookMockResponsePayload'
+                    title: Mock Responses
+                    type: array
+                  expects_response:
+                    default: true
+                    title: Expects Response
+                    type: boolean
+                  execution_mode:
+                    default: blocking
+                    enum:
+                    - blocking
+                    - fire_and_forget
+                    - background
+                    title: Execution Mode
+                    type: string
+                required:
+                - tool_id
+                - workspace_id
+                - name
+                - tool_type
+                - method
+                - url
+                - created_at
+                - updated_at
+                - content_type
+                - timeout_seconds
+                - error_handling
+                type: object
+        '401':
+          description: No permission -- see authorization schemes
+          headers: {}
+          content:
+            application/json:
+              schema:
+                properties:
+                  status:
+                    title: Status
+                    type: integer
+                  message:
+                    title: Message
+                    type: string
+                  reason:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    title: Reason
+                required:
+                - status
+                - message
+                type: object
+        '422':
+          description: ''
+          headers: {}
+          content:
+            application/json:
+              schema:
+                properties:
+                  status:
+                    title: Status
+                    type: integer
+                  message:
+                    title: Message
+                    type: string
+                  reason:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    title: Reason
+                required:
+                - status
+                - message
+                type: object
+        '503':
+          description: The server cannot process the request due to a high load
+          headers: {}
+          content:
+            application/json:
+              schema:
+                properties:
+                  status:
+                    title: Status
+                    type: integer
+                  message:
+                    title: Message
+                    type: string
+                  reason:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    title: Reason
+                required:
+                - status
+                - message
+                type: object
+      tags:
+      - Agent Tools
+      x-codeSamples:
+      - lang: bash
+        label: Create Webhook Tool
+        source: "curl --request POST \\\n  --url https://api.fish.audio/v1/agent/tools \\\n  --header 'Authorization: Bearer <token>' \\\n  --header 'Content-Type: application/json' \\\n  --data '{\n    \"name\": \"Book appointment\",\n    \"description\": \"Creates an appointment in the scheduling system.\",\n    \"method\": \"POST\",\n    \"url\": \"https://api.example.com/appointments\",\n    \"arguments\": [\n      {\"name\": \"date\", \"description\": \"Appointment date, YYYY-MM-DD\"}\n    ],\n    \"body_template\": \"{\\\"date\\\": \\\"{{date}}\\\"}\",\n    \"headers\": [\n      {\"name\": \"Authorization\", \"value\": \"Bearer <api-token>\", \"kind\": \"authorization_bearer\"}\n    ]\n  }'"
+      operationId: postV1AgentTools
+      x-operation-id-source: derived
+  /v1/agent/tools/{tool_id}:
+    get:
+      summary: Get Tool
+      description: 'Fetch one tool''s full definition. Credential header values are never
+
+        returned — each credential header reports `has_secret` instead.'
+      security:
+      - BearerAuth: []
+      parameters:
+      - in: path
+        name: tool_id
+        description: ''
+        required: true
+        schema:
+          title: Tool Id
+          type: string
+        deprecated: false
+      responses:
+        '200':
+          description: Request fulfilled, document follows
+          headers: {}
+          content:
+            application/json:
+              schema:
+                properties:
+                  tool_id:
+                    title: Tool Id
+                    type: string
+                  workspace_id:
+                    title: Workspace Id
+                    type: string
+                  name:
+                    title: Name
+                    type: string
+                  description:
+                    default: ''
+                    title: Description
+                    type: string
+                  tool_type:
+                    enum:
+                    - webhook
+                    - client
+                    title: Tool Type
+                    type: string
+                  method:
+                    enum:
+                    - GET
+                    - POST
+                    - PUT
+                    - PATCH
+                    - DELETE
+                    title: Method
+                    type: string
+                  url:
+                    title: Url
+                    type: string
+                  used_by:
+                    default: 0
+                    description: How many agents reference this tool in their draft configuration.
+                    title: Used By
+                    type: integer
+                  created_at:
+                    format: date-time
+                    title: Created At
+                    type: string
+                  updated_at:
+                    format: date-time
+                    title: Updated At
+                    type: string
+                  arguments:
+                    items:
+                      $ref: '#/components/schemas/AgentWebhookArgumentPayload'
+                    title: Arguments
+                    type: array
+                  content_type:
+                    title: Content Type
+                    type: string
+                  body_template:
+                    default: ''
+                    title: Body Template
+                    type: string
+                  headers:
+                    items:
+                      $ref: '#/components/schemas/PublicToolHeader'
+                    title: Headers
+                    type: array
+                  timeout_seconds:
+                    title: Timeout Seconds
+                    type: integer
+                  error_handling:
+                    enum:
+                    - passthrough
+                    - hide
+                    title: Error Handling
+                    type: string
+                  mock_responses:
+                    items:
+                      $ref: '#/components/schemas/AgentWebhookMockResponsePayload'
+                    title: Mock Responses
+                    type: array
+                  expects_response:
+                    default: true
+                    title: Expects Response
+                    type: boolean
+                  execution_mode:
+                    default: blocking
+                    enum:
+                    - blocking
+                    - fire_and_forget
+                    - background
+                    title: Execution Mode
+                    type: string
+                required:
+                - tool_id
+                - workspace_id
+                - name
+                - tool_type
+                - method
+                - url
+                - created_at
+                - updated_at
+                - content_type
+                - timeout_seconds
+                - error_handling
+                type: object
+        '401':
+          description: No permission -- see authorization schemes
+          headers: {}
+          content:
+            application/json:
+              schema:
+                properties:
+                  status:
+                    title: Status
+                    type: integer
+                  message:
+                    title: Message
+                    type: string
+                  reason:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    title: Reason
+                required:
+                - status
+                - message
+                type: object
+        '404':
+          description: Nothing matches the given URI
+          headers: {}
+          content:
+            application/json:
+              schema:
+                properties:
+                  status:
+                    title: Status
+                    type: integer
+                  message:
+                    title: Message
+                    type: string
+                  reason:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    title: Reason
+                required:
+                - status
+                - message
+                type: object
+        '503':
+          description: The server cannot process the request due to a high load
+          headers: {}
+          content:
+            application/json:
+              schema:
+                properties:
+                  status:
+                    title: Status
+                    type: integer
+                  message:
+                    title: Message
+                    type: string
+                  reason:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    title: Reason
+                required:
+                - status
+                - message
+                type: object
+      tags:
+      - Agent Tools
+      operationId: getV1AgentToolsByToolId
+      x-operation-id-source: derived
+    patch:
+      summary: Update Tool
+      description: 'Patch tool fields; omitted fields keep their value (null is rejected —
+
+        send an empty string to clear a text field). `headers` replaces the header
+
+        list wholesale — include credential values again whenever you send it,
+
+        since reads never return them. Attached agents'' drafts pick up the change
+
+        immediately; published versions stay frozen until re-published.'
+      security:
+      - BearerAuth: []
+      parameters:
+      - in: path
+        name: tool_id
+        description: ''
+        required: true
+        schema:
+          title: Tool Id
+          type: string
+        deprecated: false
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PublicAgentToolUpdatePayload'
+      responses:
+        '200':
+          description: Request fulfilled, document follows
+          headers: {}
+          content:
+            application/json:
+              schema:
+                properties:
+                  tool_id:
+                    title: Tool Id
+                    type: string
+                  workspace_id:
+                    title: Workspace Id
+                    type: string
+                  name:
+                    title: Name
+                    type: string
+                  description:
+                    default: ''
+                    title: Description
+                    type: string
+                  tool_type:
+                    enum:
+                    - webhook
+                    - client
+                    title: Tool Type
+                    type: string
+                  method:
+                    enum:
+                    - GET
+                    - POST
+                    - PUT
+                    - PATCH
+                    - DELETE
+                    title: Method
+                    type: string
+                  url:
+                    title: Url
+                    type: string
+                  used_by:
+                    default: 0
+                    description: How many agents reference this tool in their draft configuration.
+                    title: Used By
+                    type: integer
+                  created_at:
+                    format: date-time
+                    title: Created At
+                    type: string
+                  updated_at:
+                    format: date-time
+                    title: Updated At
+                    type: string
+                  arguments:
+                    items:
+                      $ref: '#/components/schemas/AgentWebhookArgumentPayload'
+                    title: Arguments
+                    type: array
+                  content_type:
+                    title: Content Type
+                    type: string
+                  body_template:
+                    default: ''
+                    title: Body Template
+                    type: string
+                  headers:
+                    items:
+                      $ref: '#/components/schemas/PublicToolHeader'
+                    title: Headers
+                    type: array
+                  timeout_seconds:
+                    title: Timeout Seconds
+                    type: integer
+                  error_handling:
+                    enum:
+                    - passthrough
+                    - hide
+                    title: Error Handling
+                    type: string
+                  mock_responses:
+                    items:
+                      $ref: '#/components/schemas/AgentWebhookMockResponsePayload'
+                    title: Mock Responses
+                    type: array
+                  expects_response:
+                    default: true
+                    title: Expects Response
+                    type: boolean
+                  execution_mode:
+                    default: blocking
+                    enum:
+                    - blocking
+                    - fire_and_forget
+                    - background
+                    title: Execution Mode
+                    type: string
+                required:
+                - tool_id
+                - workspace_id
+                - name
+                - tool_type
+                - method
+                - url
+                - created_at
+                - updated_at
+                - content_type
+                - timeout_seconds
+                - error_handling
+                type: object
+        '400':
+          description: Bad request syntax or unsupported method
+          headers: {}
+          content:
+            application/json:
+              schema:
+                properties:
+                  status:
+                    title: Status
+                    type: integer
+                  message:
+                    title: Message
+                    type: string
+                  reason:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    title: Reason
+                required:
+                - status
+                - message
+                type: object
+        '401':
+          description: No permission -- see authorization schemes
+          headers: {}
+          content:
+            application/json:
+              schema:
+                properties:
+                  status:
+                    title: Status
+                    type: integer
+                  message:
+                    title: Message
+                    type: string
+                  reason:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    title: Reason
+                required:
+                - status
+                - message
+                type: object
+        '404':
+          description: Nothing matches the given URI
+          headers: {}
+          content:
+            application/json:
+              schema:
+                properties:
+                  status:
+                    title: Status
+                    type: integer
+                  message:
+                    title: Message
+                    type: string
+                  reason:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    title: Reason
+                required:
+                - status
+                - message
+                type: object
+        '422':
+          description: ''
+          headers: {}
+          content:
+            application/json:
+              schema:
+                properties:
+                  status:
+                    title: Status
+                    type: integer
+                  message:
+                    title: Message
+                    type: string
+                  reason:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    title: Reason
+                required:
+                - status
+                - message
+                type: object
+        '503':
+          description: The server cannot process the request due to a high load
+          headers: {}
+          content:
+            application/json:
+              schema:
+                properties:
+                  status:
+                    title: Status
+                    type: integer
+                  message:
+                    title: Message
+                    type: string
+                  reason:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    title: Reason
+                required:
+                - status
+                - message
+                type: object
+      tags:
+      - Agent Tools
+      operationId: patchV1AgentToolsByToolId
+      x-operation-id-source: derived
+    delete:
+      summary: Delete Tool
+      description: 'Delete a tool. Returns 409 while any agent''s draft configuration still
+
+        references it — check `GET /v1/agent/tools/{tool_id}/agents` and detach it
+
+        via the agent config first, so a delete can never silently change agent
+
+        behavior.'
+      security:
+      - BearerAuth: []
+      parameters:
+      - in: path
+        name: tool_id
+        description: ''
+        required: true
+        schema:
+          title: Tool Id
+          type: string
+        deprecated: false
+      responses:
+        '204':
+          description: Request fulfilled, nothing follows
+          headers: {}
+        '401':
+          description: No permission -- see authorization schemes
+          headers: {}
+          content:
+            application/json:
+              schema:
+                properties:
+                  status:
+                    title: Status
+                    type: integer
+                  message:
+                    title: Message
+                    type: string
+                  reason:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    title: Reason
+                required:
+                - status
+                - message
+                type: object
+        '404':
+          description: Nothing matches the given URI
+          headers: {}
+          content:
+            application/json:
+              schema:
+                properties:
+                  status:
+                    title: Status
+                    type: integer
+                  message:
+                    title: Message
+                    type: string
+                  reason:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    title: Reason
+                required:
+                - status
+                - message
+                type: object
+        '409':
+          description: Request conflict
+          headers: {}
+          content:
+            application/json:
+              schema:
+                properties:
+                  status:
+                    title: Status
+                    type: integer
+                  message:
+                    title: Message
+                    type: string
+                  reason:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    title: Reason
+                required:
+                - status
+                - message
+                type: object
+        '503':
+          description: The server cannot process the request due to a high load
+          headers: {}
+          content:
+            application/json:
+              schema:
+                properties:
+                  status:
+                    title: Status
+                    type: integer
+                  message:
+                    title: Message
+                    type: string
+                  reason:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    title: Reason
+                required:
+                - status
+                - message
+                type: object
+      tags:
+      - Agent Tools
+      operationId: deleteV1AgentToolsByToolId
+      x-operation-id-source: derived
+  /v1/agent/tools/{tool_id}/agents:
+    get:
+      summary: List Agents Using Tool
+      description: 'Every agent whose draft configuration references this tool — the
+
+        pre-flight check before a delete. Published versions keep executing their
+
+        frozen tool snapshot, so only draft references block deletion.'
+      security:
+      - BearerAuth: []
+      parameters:
+      - in: path
+        name: tool_id
+        description: ''
+        required: true
+        schema:
+          title: Tool Id
+          type: string
+        deprecated: false
+      responses:
+        '200':
+          description: Request fulfilled, document follows
+          headers: {}
+          content:
+            application/json:
+              schema:
+                properties:
+                  agents:
+                    description: Agents that reference this resource in their configuration.
+                    items:
+                      $ref: '#/components/schemas/PublicDependentAgent'
+                    title: Agents
+                    type: array
+                  total:
+                    title: Total
+                    type: integer
+                required:
+                - agents
+                - total
+                type: object
+        '401':
+          description: No permission -- see authorization schemes
+          headers: {}
+          content:
+            application/json:
+              schema:
+                properties:
+                  status:
+                    title: Status
+                    type: integer
+                  message:
+                    title: Message
+                    type: string
+                  reason:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    title: Reason
+                required:
+                - status
+                - message
+                type: object
+        '404':
+          description: Nothing matches the given URI
+          headers: {}
+          content:
+            application/json:
+              schema:
+                properties:
+                  status:
+                    title: Status
+                    type: integer
+                  message:
+                    title: Message
+                    type: string
+                  reason:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    title: Reason
+                required:
+                - status
+                - message
+                type: object
+        '503':
+          description: The server cannot process the request due to a high load
+          headers: {}
+          content:
+            application/json:
+              schema:
+                properties:
+                  status:
+                    title: Status
+                    type: integer
+                  message:
+                    title: Message
+                    type: string
+                  reason:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    title: Reason
+                required:
+                - status
+                - message
+                type: object
+      tags:
+      - Agent Tools
+      operationId: getV1AgentToolsByToolIdAgents
+      x-operation-id-source: derived
+components:
+  schemas:
+    AgentWebhookHeaderPayload:
+      properties:
+        name:
+          maxLength: 128
+          minLength: 1
+          title: Name
+          type: string
+        value:
+          maxLength: 4000
+          title: Value
+          type: string
+        kind:
+          default: custom
+          enum:
+          - custom
+          - authorization_bearer
+          - authorization_basic
+          title: Kind
+          type: string
+      required:
+      - name
+      - value
+      title: AgentWebhookHeaderPayload
+      type: object
+    PublicToolHeader:
+      properties:
+        name:
+          title: Name
+          type: string
+        kind:
+          enum:
+          - custom
+          - authorization_bearer
+          - authorization_basic
+          title: Kind
+          type: string
+        value:
+          anyOf:
+          - type: string
+          - type: 'null'
+          default: null
+          description: Header value; null for credential kinds (authorization_bearer / authorization_basic), which are write-only.
+          title: Value
+        has_secret:
+          default: false
+          description: Whether a credential value is stored; the value itself is never returned.
+          title: Has Secret
+          type: boolean
+      required:
+      - name
+      - kind
+      title: PublicToolHeader
+      type: object
+    PublicAgentToolSummary:
+      properties:
+        tool_id:
+          title: Tool Id
+          type: string
+        workspace_id:
+          title: Workspace Id
+          type: string
+        name:
+          title: Name
+          type: string
+        description:
+          default: ''
+          title: Description
+          type: string
+        tool_type:
+          enum:
+          - webhook
+          - client
+          title: Tool Type
+          type: string
+        method:
+          enum:
+          - GET
+          - POST
+          - PUT
+          - PATCH
+          - DELETE
+          title: Method
+          type: string
+        url:
+          title: Url
+          type: string
+        used_by:
+          default: 0
+          description: How many agents reference this tool in their draft configuration.
+          title: Used By
+          type: integer
+        created_at:
+          format: date-time
+          title: Created At
+          type: string
+        updated_at:
+          format: date-time
+          title: Updated At
+          type: string
+      required:
+      - tool_id
+      - workspace_id
+      - name
+      - tool_type
+      - method
+      - url
+      - created_at
+      - updated_at
+      title: PublicAgentToolSummary
+      type: object
+    PublicDependentAgent:
+      properties:
+        agent_id:
+          title: Agent Id
+          type: string
+        name:
+          title: Name
+          type: string
+      required:
+      - agent_id
+      - name
+      title: PublicDependentAgent
+      type: object
+    PublicAgentToolCreatePayload:
+      additionalProperties: false
+      description: Console payload minus the folder concept (folders are console-only).
+      properties:
+        name:
+          maxLength: 120
+          minLength: 1
+          title: Name
+          type: string
+        description:
+          default: ''
+          maxLength: 2000
+          title: Description
+          type: string
+        tool_type:
+          default: webhook
+          enum:
+          - webhook
+          - client
+          title: Tool Type
+          type: string
+        arguments:
+          items:
+            $ref: '#/components/schemas/AgentWebhookArgumentPayload'
+          title: Arguments
+          type: array
+        method:
+          default: POST
+          enum:
+          - GET
+          - POST
+          - PUT
+          - PATCH
+          - DELETE
+          title: Method
+          type: string
+        url:
+          default: ''
+          maxLength: 4000
+          title: Url
+          type: string
+        content_type:
+          default: application/json
+          maxLength: 128
+          title: Content Type
+          type: string
+        body_template:
+          default: ''
+          description: 'Request body sent for non-GET calls. `{{argument}}`, `{{system.*}}` and custom session variable placeholders are filled in at call time; a missing value becomes empty. When the body''s content type is JSON (the default `application/json`, any `+json` type, or a `Content-Type` header saying so), a placeholder inside a JSON string, such as `{"note": "{{note}}"}`, is JSON-escaped, so quotes, backslashes and newlines in the value keep the body valid JSON. A placeholder outside a string, such as `{"count": {{count}}}`, is inserted as is. Other content types are filled in as is.'
+          maxLength: 100000
+          title: Body Template
+          type: string
+        headers:
+          items:
+            $ref: '#/components/schemas/AgentWebhookHeaderPayload'
+          title: Headers
+          type: array
+        timeout_seconds:
+          default: 30
+          maximum: 300
+          minimum: 1
+          title: Timeout Seconds
+          type: integer
+        error_handling:
+          default: passthrough
+          enum:
+          - passthrough
+          - hide
+          title: Error Handling
+          type: string
+        mock_responses:
+          items:
+            $ref: '#/components/schemas/AgentWebhookMockResponsePayload'
+          title: Mock Responses
+          type: array
+        expects_response:
+          default: true
+          title: Expects Response
+          type: boolean
+        execution_mode:
+          default: blocking
+          enum:
+          - blocking
+          - fire_and_forget
+          - background
+          title: Execution Mode
+          type: string
+      required:
+      - name
+      title: PublicAgentToolCreatePayload
+      type: object
+    AgentWebhookMockResponsePayload:
+      properties:
+        name:
+          default: ''
+          maxLength: 120
+          title: Name
+          type: string
+        status_code:
+          default: 200
+          maximum: 599
+          minimum: 100
+          title: Status Code
+          type: integer
+        content_type:
+          default: application/json
+          maxLength: 128
+          title: Content Type
+          type: string
+        body:
+          default: ''
+          maxLength: 100000
+          title: Body
+          type: string
+      title: AgentWebhookMockResponsePayload
+      type: object
+    PublicAgentToolUpdatePayload:
+      additionalProperties: false
+      properties:
+        name:
+          anyOf:
+          - maxLength: 120
+            minLength: 1
+            type: string
+          - type: 'null'
+          default: null
+          title: Name
+        description:
+          anyOf:
+          - maxLength: 2000
+            type: string
+          - type: 'null'
+          default: null
+          title: Description
+        arguments:
+          anyOf:
+          - items:
+              $ref: '#/components/schemas/AgentWebhookArgumentPayload'
+            type: array
+          - type: 'null'
+          default: null
+          title: Arguments
+        method:
+          anyOf:
+          - enum:
+            - GET
+            - POST
+            - PUT
+            - PATCH
+            - DELETE
+            type: string
+          - type: 'null'
+          default: null
+          title: Method
+        url:
+          anyOf:
+          - maxLength: 4000
+            minLength: 1
+            type: string
+          - type: 'null'
+          default: null
+          title: Url
+        content_type:
+          anyOf:
+          - maxLength: 128
+            type: string
+          - type: 'null'
+          default: null
+          title: Content Type
+        body_template:
+          anyOf:
+          - maxLength: 100000
+            type: string
+          - type: 'null'
+          default: null
+          description: 'Request body sent for non-GET calls. `{{argument}}`, `{{system.*}}` and custom session variable placeholders are filled in at call time; a missing value becomes empty. When the body''s content type is JSON (the default `application/json`, any `+json` type, or a `Content-Type` header saying so), a placeholder inside a JSON string, such as `{"note": "{{note}}"}`, is JSON-escaped, so quotes, backslashes and newlines in the value keep the body valid JSON. A placeholder outside a string, such as `{"count": {{count}}}`, is inserted as is. Other content types are filled in as is.'
+          title: Body Template
+        headers:
+          anyOf:
+          - items:
+              $ref: '#/components/schemas/AgentWebhookHeaderPayload'
+            type: array
+          - type: 'null'
+          default: null
+          title: Headers
+        timeout_seconds:
+          anyOf:
+          - maximum: 300
+            minimum: 1
+            type: integer
+          - type: 'null'
+          default: null
+          title: Timeout Seconds
+        error_handling:
+          anyOf:
+          - enum:
+            - passthrough
+            - hide
+            type: string
+          - type: 'null'
+          default: null
+          title: Error Handling
+        mock_responses:
+          anyOf:
+          - items:
+              $ref: '#/components/schemas/AgentWebhookMockResponsePayload'
+            type: array
+          - type: 'null'
+          default: null
+          title: Mock Responses
+        expects_response:
+          anyOf:
+          - type: boolean
+          - type: 'null'
+          default: null
+          title: Expects Response
+        execution_mode:
+          anyOf:
+          - enum:
+            - blocking
+            - fire_and_forget
+            - background
+            type: string
+          - type: 'null'
+          default: null
+          title: Execution Mode
+      title: PublicAgentToolUpdatePayload
+      type: object
+    AgentWebhookArgumentPayload:
+      properties:
+        name:
+          maxLength: 64
+          minLength: 1
+          title: Name
+          type: string
+        description:
+          default: ''
+          maxLength: 500
+          title: Description
+          type: string
+      required:
+      - name
+      title: AgentWebhookArgumentPayload
+      type: object
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer

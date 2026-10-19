@@ -1,0 +1,489 @@
+openapi: 3.2.0
+info:
+  title: FishAudio Open Phone Calls API
+  version: '1'
+servers:
+- description: Fish Audio API
+  url: https://api.fish.audio
+tags:
+- name: Phone Calls
+paths:
+  /v1/agent/phone-calls:
+    post:
+      summary: Create Phone Call
+      description: 'Place an outbound call from one of your phone numbers. Platform numbers
+
+        dial US, Canada or Japan destinations, and a domestic trunk 0 after +81
+
+        (e.g. +81080...) is accepted and normalized to E.164 (+8180...).
+
+        Imported SIP numbers dial through their own termination and may attach
+
+        custom INVITE headers with `sip_headers`. Returns immediately with the
+
+        session queued for dialing. Subscribe to the `phone_call.dial_finished`
+
+        webhook or poll `GET /v1/agent/sessions/{session_id}` for the dial
+
+        outcome and the leg''s `sip_call_id`. Ringing is never billed: metering
+
+        starts when the callee answers.
+
+
+        Errors carry a machine-readable `reason` (e.g. `destination_not_allowed`,
+
+        `insufficient_credit`, `concurrency_limit_exceeded`).'
+      security:
+      - BearerAuth: []
+      parameters:
+      - in: header
+        name: idempotency-key
+        description: 'Retry-safe replay key: the same key with the same body returns the call already placed instead of dialing again (24h window).'
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          default: null
+          title: Idempotency-Key
+        deprecated: false
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PhoneCallCreatePayload'
+      responses:
+        '201':
+          description: Document created, URL follows
+          headers: {}
+          content:
+            application/json:
+              schema:
+                properties:
+                  session_id:
+                    title: Session Id
+                    type: string
+                  status:
+                    const: queued
+                    default: queued
+                    title: Status
+                    type: string
+                required:
+                - session_id
+                type: object
+        '401':
+          description: No permission -- see authorization schemes
+          headers: {}
+          content:
+            application/json:
+              schema:
+                properties:
+                  status:
+                    title: Status
+                    type: integer
+                  message:
+                    title: Message
+                    type: string
+                  reason:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    title: Reason
+                required:
+                - status
+                - message
+                type: object
+        '402':
+          description: No payment -- see charging schemes
+          headers: {}
+          content:
+            application/json:
+              schema:
+                properties:
+                  status:
+                    title: Status
+                    type: integer
+                  message:
+                    title: Message
+                    type: string
+                  reason:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    title: Reason
+                required:
+                - status
+                - message
+                type: object
+        '403':
+          description: Request forbidden -- authorization will not help
+          headers: {}
+          content:
+            application/json:
+              schema:
+                properties:
+                  status:
+                    title: Status
+                    type: integer
+                  message:
+                    title: Message
+                    type: string
+                  reason:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    title: Reason
+                required:
+                - status
+                - message
+                type: object
+        '404':
+          description: Nothing matches the given URI
+          headers: {}
+          content:
+            application/json:
+              schema:
+                properties:
+                  status:
+                    title: Status
+                    type: integer
+                  message:
+                    title: Message
+                    type: string
+                  reason:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    title: Reason
+                required:
+                - status
+                - message
+                type: object
+        '409':
+          description: Request conflict
+          headers: {}
+          content:
+            application/json:
+              schema:
+                properties:
+                  status:
+                    title: Status
+                    type: integer
+                  message:
+                    title: Message
+                    type: string
+                  reason:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    title: Reason
+                required:
+                - status
+                - message
+                type: object
+        '422':
+          description: ''
+          headers: {}
+          content:
+            application/json:
+              schema:
+                properties:
+                  status:
+                    title: Status
+                    type: integer
+                  message:
+                    title: Message
+                    type: string
+                  reason:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    title: Reason
+                required:
+                - status
+                - message
+                type: object
+        '429':
+          description: The user has sent too many requests in a given amount of time ("rate limiting")
+          headers: {}
+          content:
+            application/json:
+              schema:
+                properties:
+                  status:
+                    title: Status
+                    type: integer
+                  message:
+                    title: Message
+                    type: string
+                  reason:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    title: Reason
+                required:
+                - status
+                - message
+                type: object
+        '502':
+          description: Invalid responses from another server/proxy
+          headers: {}
+          content:
+            application/json:
+              schema:
+                properties:
+                  status:
+                    title: Status
+                    type: integer
+                  message:
+                    title: Message
+                    type: string
+                  reason:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    title: Reason
+                required:
+                - status
+                - message
+                type: object
+        '503':
+          description: The server cannot process the request due to a high load
+          headers: {}
+          content:
+            application/json:
+              schema:
+                properties:
+                  status:
+                    title: Status
+                    type: integer
+                  message:
+                    title: Message
+                    type: string
+                  reason:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    title: Reason
+                required:
+                - status
+                - message
+                type: object
+      tags:
+      - Phone Calls
+      x-codeSamples:
+      - lang: bash
+        label: Create Phone Call
+        source: "curl --request POST \\\n  --url https://api.fish.audio/v1/agent/phone-calls \\\n  --header 'Authorization: Bearer <token>' \\\n  --header 'Content-Type: application/json' \\\n  --header 'Idempotency-Key: <unique-key>' \\\n  --data '{\n    \"agent_id\": \"<agent-id>\",\n    \"phone_number_id\": \"<phone-number-id>\",\n    \"to_number\": \"+14155550123\"\n  }'"
+      operationId: postV1AgentPhoneCalls
+      x-operation-id-source: derived
+components:
+  schemas:
+    PhoneCallCreatePayload:
+      additionalProperties: false
+      description: 'POST phone-calls body, shared by the public and console routes.
+
+
+        to_number is deliberately not format-validated here: the contract orders
+
+        the E.164 check after the agent/published checks, so it runs in the
+
+        service with a machine-readable reason.'
+      properties:
+        agent_id:
+          title: Agent Id
+          type: string
+        phone_number_id:
+          description: The team-owned number to dial from (twilio provider only).
+          title: Phone Number Id
+          type: string
+        to_number:
+          description: Destination in E.164, e.g. +14155550123.
+          title: To Number
+          type: string
+        dynamic_variables:
+          anyOf:
+          - additionalProperties:
+              anyOf:
+              - type: string
+              - type: integer
+              - type: number
+              - type: boolean
+            maxProperties: 500
+            type: object
+          - type: 'null'
+          default: null
+          title: Dynamic Variables
+        overrides:
+          anyOf:
+          - $ref: '#/components/schemas/AgentSessionOverridesPayload'
+          - type: 'null'
+          default: null
+        metadata:
+          anyOf:
+          - additionalProperties:
+              $ref: '#/components/schemas/JsonValue'
+            type: object
+          - type: 'null'
+          default: null
+          title: Metadata
+        llm_extra_body:
+          anyOf:
+          - additionalProperties:
+              $ref: '#/components/schemas/JsonValue'
+            type: object
+          - type: 'null'
+          default: null
+          title: Llm Extra Body
+        sip_headers:
+          anyOf:
+          - additionalProperties:
+              type: string
+            type: object
+          - type: 'null'
+          default: null
+          description: Custom SIP headers for this call's INVITE, imported SIP numbers only. Same rules as the number's termination_headers, and merged over them.
+          title: Sip Headers
+      required:
+      - agent_id
+      - phone_number_id
+      - to_number
+      title: PhoneCallCreatePayload
+      type: object
+    AgentSessionOverridesPayload:
+      additionalProperties: false
+      description: 'Wire twin of @fishaudio/agent-protocol `SessionOverrides` (session.ts).
+
+
+        Every field must be allow-listed in Agent.overrides_allowed; unauthorized
+
+        fields fail session creation loudly rather than being silently dropped.'
+      properties:
+        first_message:
+          anyOf:
+          - maxLength: 10000
+            type: string
+          - type: 'null'
+          default: null
+          title: First Message
+        first_message_prompt:
+          anyOf:
+          - maxLength: 10000
+            type: string
+          - type: 'null'
+          default: null
+          title: First Message Prompt
+        system_prompt:
+          anyOf:
+          - maxLength: 500000
+            type: string
+          - type: 'null'
+          default: null
+          description: Limited to 32000 tokens (o200k_base), same budget as the configured prompt it replaces.
+          title: System Prompt
+        voice_id:
+          anyOf:
+          - maxLength: 256
+            type: string
+          - type: 'null'
+          default: null
+          title: Voice Id
+        language:
+          anyOf:
+          - enum:
+            - en
+            - ja
+            - zh
+            - ko
+            - es
+            - fr
+            - de
+            - pt
+            - it
+            - nl
+            - ar
+            - hi
+            - id
+            - tr
+            - ru
+            - bg
+            - sr
+            - hr
+            - cs
+            - sk
+            - pl
+            - uk
+            - ro
+            - hu
+            - el
+            - sv
+            - da
+            - 'no'
+            - fi
+            - et
+            - lv
+            - lt
+            - ca
+            - he
+            - fa
+            - ur
+            - kk
+            - ka
+            - hy
+            - bn
+            - ta
+            - te
+            - kn
+            - mr
+            - gu
+            - pa
+            - ne
+            - th
+            - vi
+            - ms
+            - tl
+            - af
+            type: string
+          - type: 'null'
+          default: null
+          title: Language
+        asr:
+          anyOf:
+          - $ref: '#/components/schemas/AgentSessionAsrOverridesPayload'
+          - type: 'null'
+          default: null
+      title: AgentSessionOverridesPayload
+      type: object
+    AgentSessionAsrOverridesPayload:
+      additionalProperties: false
+      description: Per-session subset of the agent config's asr section, same field names.
+      properties:
+        model:
+          anyOf:
+          - enum:
+            - deepgram:nova-3
+            - elevenlabs:scribe_v2_realtime
+            - elevenlabs:scribe_v2_medical
+            - fish_audio:transcribe-1-pro-realtime
+            type: string
+          - type: 'null'
+          default: null
+          description: Speech recognition model for this session, same values as the agent's `asr.model`. A model in preview is refused with 403 unless your team has access or the agent already uses it.
+          title: Model
+      title: AgentSessionAsrOverridesPayload
+      type: object
+    JsonValue: {}
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer

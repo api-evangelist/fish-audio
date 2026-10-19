@@ -1,0 +1,1066 @@
+openapi: 3.2.0
+info:
+  title: FishAudio Open Knowledge Sources API
+  version: '1'
+servers:
+- description: Fish Audio API
+  url: https://api.fish.audio
+tags:
+- name: Knowledge Sources
+paths:
+  /v1/agent/knowledge-sources:
+    get:
+      summary: List Knowledge Sources
+      description: 'List your team''s knowledge sources, newest first. Paginate with `cursor`
+
+        (follow `next_cursor` while `has_more` is true) or with `page` for offset
+
+        pagination with a `total` count — the two are mutually exclusive.'
+      security:
+      - BearerAuth: []
+      parameters:
+      - in: query
+        name: search
+        description: Case-insensitive match on name and file name.
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          default: null
+          title: Search
+        deprecated: false
+      - in: query
+        name: cursor
+        description: ''
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          default: null
+          title: Cursor
+        deprecated: false
+      - in: query
+        name: page
+        description: 1-based page number; mutually exclusive with cursor.
+        required: false
+        schema:
+          anyOf:
+          - minimum: 1
+            type: integer
+          - type: 'null'
+          default: null
+          title: Page
+        deprecated: false
+      - in: query
+        name: include_total
+        description: ''
+        required: false
+        schema:
+          default: false
+          title: Include Total
+          type: boolean
+        deprecated: false
+      - in: query
+        name: page_size
+        description: ''
+        required: false
+        schema:
+          default: 30
+          maximum: 100
+          minimum: 1
+          title: Page Size
+          type: integer
+        deprecated: false
+      responses:
+        '200':
+          description: Request fulfilled, document follows
+          headers: {}
+          content:
+            application/json:
+              schema:
+                properties:
+                  knowledge_sources:
+                    items:
+                      $ref: '#/components/schemas/PublicKnowledgeSourceSummary'
+                    title: Knowledge Sources
+                    type: array
+                  has_more:
+                    title: Has More
+                    type: boolean
+                  next_cursor:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    title: Next Cursor
+                  total:
+                    anyOf:
+                    - type: integer
+                    - type: 'null'
+                    default: null
+                    title: Total
+                required:
+                - knowledge_sources
+                - has_more
+                type: object
+        '400':
+          description: Bad request syntax or unsupported method
+          headers: {}
+          content:
+            application/json:
+              schema:
+                properties:
+                  status:
+                    title: Status
+                    type: integer
+                  message:
+                    title: Message
+                    type: string
+                  reason:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    title: Reason
+                required:
+                - status
+                - message
+                type: object
+        '401':
+          description: No permission -- see authorization schemes
+          headers: {}
+          content:
+            application/json:
+              schema:
+                properties:
+                  status:
+                    title: Status
+                    type: integer
+                  message:
+                    title: Message
+                    type: string
+                  reason:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    title: Reason
+                required:
+                - status
+                - message
+                type: object
+        '503':
+          description: The server cannot process the request due to a high load
+          headers: {}
+          content:
+            application/json:
+              schema:
+                properties:
+                  status:
+                    title: Status
+                    type: integer
+                  message:
+                    title: Message
+                    type: string
+                  reason:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    title: Reason
+                required:
+                - status
+                - message
+                type: object
+      tags:
+      - Knowledge Sources
+      operationId: getV1AgentKnowledgeSources
+      x-operation-id-source: derived
+    post:
+      summary: Create Knowledge Source
+      description: 'Upload a plain-text or Markdown file (UTF-8, up to 1 MB) as a knowledge
+
+        source. Send `multipart/form-data` with the file in `source`; `name`
+
+        defaults to the file name. Attach it to agents via the agent config''s
+
+        `knowledge_base.knowledge_source_ids`.'
+      security:
+      - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              properties:
+                source:
+                  format: binary
+                  title: Source
+                  type: string
+                name:
+                  anyOf:
+                  - type: string
+                  - type: 'null'
+                  default: null
+                  title: Name
+                description:
+                  default: ''
+                  title: Description
+                  type: string
+              required:
+              - source
+              type: object
+      responses:
+        '201':
+          description: Document created, URL follows
+          headers: {}
+          content:
+            application/json:
+              schema:
+                properties:
+                  knowledge_source_id:
+                    title: Knowledge Source Id
+                    type: string
+                  workspace_id:
+                    title: Workspace Id
+                    type: string
+                  name:
+                    title: Name
+                    type: string
+                  description:
+                    default: ''
+                    title: Description
+                    type: string
+                  file_name:
+                    title: File Name
+                    type: string
+                  size_bytes:
+                    title: Size Bytes
+                    type: integer
+                  chunk_count:
+                    title: Chunk Count
+                    type: integer
+                  revision_number:
+                    description: Increments every time the content is replaced. Drafts always use the newest revision; published versions pin the revision current at publish time.
+                    title: Revision Number
+                    type: integer
+                  created_at:
+                    format: date-time
+                    title: Created At
+                    type: string
+                  updated_at:
+                    format: date-time
+                    title: Updated At
+                    type: string
+                  content:
+                    description: The full current text content.
+                    title: Content
+                    type: string
+                required:
+                - knowledge_source_id
+                - workspace_id
+                - name
+                - file_name
+                - size_bytes
+                - chunk_count
+                - revision_number
+                - created_at
+                - updated_at
+                - content
+                type: object
+        '400':
+          description: Bad request syntax or unsupported method
+          headers: {}
+          content:
+            application/json:
+              schema:
+                properties:
+                  status:
+                    title: Status
+                    type: integer
+                  message:
+                    title: Message
+                    type: string
+                  reason:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    title: Reason
+                required:
+                - status
+                - message
+                type: object
+        '401':
+          description: No permission -- see authorization schemes
+          headers: {}
+          content:
+            application/json:
+              schema:
+                properties:
+                  status:
+                    title: Status
+                    type: integer
+                  message:
+                    title: Message
+                    type: string
+                  reason:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    title: Reason
+                required:
+                - status
+                - message
+                type: object
+        '403':
+          description: Request forbidden -- authorization will not help
+          headers: {}
+          content:
+            application/json:
+              schema:
+                properties:
+                  status:
+                    title: Status
+                    type: integer
+                  message:
+                    title: Message
+                    type: string
+                  reason:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    title: Reason
+                required:
+                - status
+                - message
+                type: object
+        '422':
+          description: ''
+          headers: {}
+          content:
+            application/json:
+              schema:
+                properties:
+                  status:
+                    title: Status
+                    type: integer
+                  message:
+                    title: Message
+                    type: string
+                  reason:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    title: Reason
+                required:
+                - status
+                - message
+                type: object
+        '503':
+          description: The server cannot process the request due to a high load
+          headers: {}
+          content:
+            application/json:
+              schema:
+                properties:
+                  status:
+                    title: Status
+                    type: integer
+                  message:
+                    title: Message
+                    type: string
+                  reason:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    title: Reason
+                required:
+                - status
+                - message
+                type: object
+      tags:
+      - Knowledge Sources
+      operationId: postV1AgentKnowledgeSources
+      x-operation-id-source: derived
+  /v1/agent/knowledge-sources/{source_id}:
+    get:
+      summary: Get Knowledge Source
+      description: 'Fetch one knowledge source including its full text content and current
+
+        revision number.'
+      security:
+      - BearerAuth: []
+      parameters:
+      - in: path
+        name: source_id
+        description: ''
+        required: true
+        schema:
+          title: Source Id
+          type: string
+        deprecated: false
+      responses:
+        '200':
+          description: Request fulfilled, document follows
+          headers: {}
+          content:
+            application/json:
+              schema:
+                properties:
+                  knowledge_source_id:
+                    title: Knowledge Source Id
+                    type: string
+                  workspace_id:
+                    title: Workspace Id
+                    type: string
+                  name:
+                    title: Name
+                    type: string
+                  description:
+                    default: ''
+                    title: Description
+                    type: string
+                  file_name:
+                    title: File Name
+                    type: string
+                  size_bytes:
+                    title: Size Bytes
+                    type: integer
+                  chunk_count:
+                    title: Chunk Count
+                    type: integer
+                  revision_number:
+                    description: Increments every time the content is replaced. Drafts always use the newest revision; published versions pin the revision current at publish time.
+                    title: Revision Number
+                    type: integer
+                  created_at:
+                    format: date-time
+                    title: Created At
+                    type: string
+                  updated_at:
+                    format: date-time
+                    title: Updated At
+                    type: string
+                  content:
+                    description: The full current text content.
+                    title: Content
+                    type: string
+                required:
+                - knowledge_source_id
+                - workspace_id
+                - name
+                - file_name
+                - size_bytes
+                - chunk_count
+                - revision_number
+                - created_at
+                - updated_at
+                - content
+                type: object
+        '401':
+          description: No permission -- see authorization schemes
+          headers: {}
+          content:
+            application/json:
+              schema:
+                properties:
+                  status:
+                    title: Status
+                    type: integer
+                  message:
+                    title: Message
+                    type: string
+                  reason:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    title: Reason
+                required:
+                - status
+                - message
+                type: object
+        '404':
+          description: Nothing matches the given URI
+          headers: {}
+          content:
+            application/json:
+              schema:
+                properties:
+                  status:
+                    title: Status
+                    type: integer
+                  message:
+                    title: Message
+                    type: string
+                  reason:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    title: Reason
+                required:
+                - status
+                - message
+                type: object
+        '503':
+          description: The server cannot process the request due to a high load
+          headers: {}
+          content:
+            application/json:
+              schema:
+                properties:
+                  status:
+                    title: Status
+                    type: integer
+                  message:
+                    title: Message
+                    type: string
+                  reason:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    title: Reason
+                required:
+                - status
+                - message
+                type: object
+      tags:
+      - Knowledge Sources
+      operationId: getV1AgentKnowledgeSourcesBySourceId
+      x-operation-id-source: derived
+    patch:
+      summary: Update Knowledge Source
+      description: 'Rename the source and/or replace its content by uploading a new file in
+
+        `source` (multipart). Replacing content increments `revision_number` while
+
+        the id stays stable, and every attached agent''s draft picks it up
+
+        immediately; published versions pin the revision they were published with,
+
+        so republish each affected agent to put the new content live — that
+
+        two-step (sync content, republish) is the nightly content-sync recipe.'
+      security:
+      - BearerAuth: []
+      parameters:
+      - in: path
+        name: source_id
+        description: ''
+        required: true
+        schema:
+          title: Source Id
+          type: string
+        deprecated: false
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              properties:
+                source:
+                  anyOf:
+                  - format: binary
+                    type: string
+                  - type: 'null'
+                  default: null
+                  title: Source
+                name:
+                  anyOf:
+                  - type: string
+                  - type: 'null'
+                  default: null
+                  title: Name
+                description:
+                  anyOf:
+                  - type: string
+                  - type: 'null'
+                  default: null
+                  title: Description
+              type: object
+      responses:
+        '200':
+          description: Request fulfilled, document follows
+          headers: {}
+          content:
+            application/json:
+              schema:
+                properties:
+                  knowledge_source_id:
+                    title: Knowledge Source Id
+                    type: string
+                  workspace_id:
+                    title: Workspace Id
+                    type: string
+                  name:
+                    title: Name
+                    type: string
+                  description:
+                    default: ''
+                    title: Description
+                    type: string
+                  file_name:
+                    title: File Name
+                    type: string
+                  size_bytes:
+                    title: Size Bytes
+                    type: integer
+                  chunk_count:
+                    title: Chunk Count
+                    type: integer
+                  revision_number:
+                    description: Increments every time the content is replaced. Drafts always use the newest revision; published versions pin the revision current at publish time.
+                    title: Revision Number
+                    type: integer
+                  created_at:
+                    format: date-time
+                    title: Created At
+                    type: string
+                  updated_at:
+                    format: date-time
+                    title: Updated At
+                    type: string
+                  content:
+                    description: The full current text content.
+                    title: Content
+                    type: string
+                required:
+                - knowledge_source_id
+                - workspace_id
+                - name
+                - file_name
+                - size_bytes
+                - chunk_count
+                - revision_number
+                - created_at
+                - updated_at
+                - content
+                type: object
+        '400':
+          description: Bad request syntax or unsupported method
+          headers: {}
+          content:
+            application/json:
+              schema:
+                properties:
+                  status:
+                    title: Status
+                    type: integer
+                  message:
+                    title: Message
+                    type: string
+                  reason:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    title: Reason
+                required:
+                - status
+                - message
+                type: object
+        '401':
+          description: No permission -- see authorization schemes
+          headers: {}
+          content:
+            application/json:
+              schema:
+                properties:
+                  status:
+                    title: Status
+                    type: integer
+                  message:
+                    title: Message
+                    type: string
+                  reason:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    title: Reason
+                required:
+                - status
+                - message
+                type: object
+        '404':
+          description: Nothing matches the given URI
+          headers: {}
+          content:
+            application/json:
+              schema:
+                properties:
+                  status:
+                    title: Status
+                    type: integer
+                  message:
+                    title: Message
+                    type: string
+                  reason:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    title: Reason
+                required:
+                - status
+                - message
+                type: object
+        '422':
+          description: ''
+          headers: {}
+          content:
+            application/json:
+              schema:
+                properties:
+                  status:
+                    title: Status
+                    type: integer
+                  message:
+                    title: Message
+                    type: string
+                  reason:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    title: Reason
+                required:
+                - status
+                - message
+                type: object
+        '503':
+          description: The server cannot process the request due to a high load
+          headers: {}
+          content:
+            application/json:
+              schema:
+                properties:
+                  status:
+                    title: Status
+                    type: integer
+                  message:
+                    title: Message
+                    type: string
+                  reason:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    title: Reason
+                required:
+                - status
+                - message
+                type: object
+      tags:
+      - Knowledge Sources
+      operationId: patchV1AgentKnowledgeSourcesBySourceId
+      x-operation-id-source: derived
+    delete:
+      summary: Delete Knowledge Source
+      description: 'Delete a knowledge source. Returns 409 while any agent still references it
+
+        — in its draft or in its currently published version (sessions resolve
+
+        sources at call time, so deleting a published reference would change a
+
+        running agent). Check `GET /v1/agent/knowledge-sources/{source_id}/agents`,
+
+        detach via the agent config, and republish if needed before deleting.'
+      security:
+      - BearerAuth: []
+      parameters:
+      - in: path
+        name: source_id
+        description: ''
+        required: true
+        schema:
+          title: Source Id
+          type: string
+        deprecated: false
+      responses:
+        '204':
+          description: Request fulfilled, nothing follows
+          headers: {}
+        '401':
+          description: No permission -- see authorization schemes
+          headers: {}
+          content:
+            application/json:
+              schema:
+                properties:
+                  status:
+                    title: Status
+                    type: integer
+                  message:
+                    title: Message
+                    type: string
+                  reason:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    title: Reason
+                required:
+                - status
+                - message
+                type: object
+        '404':
+          description: Nothing matches the given URI
+          headers: {}
+          content:
+            application/json:
+              schema:
+                properties:
+                  status:
+                    title: Status
+                    type: integer
+                  message:
+                    title: Message
+                    type: string
+                  reason:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    title: Reason
+                required:
+                - status
+                - message
+                type: object
+        '409':
+          description: Request conflict
+          headers: {}
+          content:
+            application/json:
+              schema:
+                properties:
+                  status:
+                    title: Status
+                    type: integer
+                  message:
+                    title: Message
+                    type: string
+                  reason:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    title: Reason
+                required:
+                - status
+                - message
+                type: object
+        '503':
+          description: The server cannot process the request due to a high load
+          headers: {}
+          content:
+            application/json:
+              schema:
+                properties:
+                  status:
+                    title: Status
+                    type: integer
+                  message:
+                    title: Message
+                    type: string
+                  reason:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    title: Reason
+                required:
+                - status
+                - message
+                type: object
+      tags:
+      - Knowledge Sources
+      operationId: deleteV1AgentKnowledgeSourcesBySourceId
+      x-operation-id-source: derived
+  /v1/agent/knowledge-sources/{source_id}/agents:
+    get:
+      summary: List Agents Using Knowledge Source
+      description: 'Every agent that references this source in its draft or currently
+
+        published configuration — the pre-flight check before a delete.'
+      security:
+      - BearerAuth: []
+      parameters:
+      - in: path
+        name: source_id
+        description: ''
+        required: true
+        schema:
+          title: Source Id
+          type: string
+        deprecated: false
+      responses:
+        '200':
+          description: Request fulfilled, document follows
+          headers: {}
+          content:
+            application/json:
+              schema:
+                properties:
+                  agents:
+                    description: Agents that reference this resource in their configuration.
+                    items:
+                      $ref: '#/components/schemas/PublicDependentAgent'
+                    title: Agents
+                    type: array
+                  total:
+                    title: Total
+                    type: integer
+                required:
+                - agents
+                - total
+                type: object
+        '401':
+          description: No permission -- see authorization schemes
+          headers: {}
+          content:
+            application/json:
+              schema:
+                properties:
+                  status:
+                    title: Status
+                    type: integer
+                  message:
+                    title: Message
+                    type: string
+                  reason:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    title: Reason
+                required:
+                - status
+                - message
+                type: object
+        '404':
+          description: Nothing matches the given URI
+          headers: {}
+          content:
+            application/json:
+              schema:
+                properties:
+                  status:
+                    title: Status
+                    type: integer
+                  message:
+                    title: Message
+                    type: string
+                  reason:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    title: Reason
+                required:
+                - status
+                - message
+                type: object
+        '503':
+          description: The server cannot process the request due to a high load
+          headers: {}
+          content:
+            application/json:
+              schema:
+                properties:
+                  status:
+                    title: Status
+                    type: integer
+                  message:
+                    title: Message
+                    type: string
+                  reason:
+                    anyOf:
+                    - type: string
+                    - type: 'null'
+                    default: null
+                    title: Reason
+                required:
+                - status
+                - message
+                type: object
+      tags:
+      - Knowledge Sources
+      operationId: getV1AgentKnowledgeSourcesBySourceIdAgents
+      x-operation-id-source: derived
+components:
+  schemas:
+    PublicKnowledgeSourceSummary:
+      properties:
+        knowledge_source_id:
+          title: Knowledge Source Id
+          type: string
+        workspace_id:
+          title: Workspace Id
+          type: string
+        name:
+          title: Name
+          type: string
+        description:
+          default: ''
+          title: Description
+          type: string
+        file_name:
+          title: File Name
+          type: string
+        size_bytes:
+          title: Size Bytes
+          type: integer
+        chunk_count:
+          title: Chunk Count
+          type: integer
+        revision_number:
+          description: Increments every time the content is replaced. Drafts always use the newest revision; published versions pin the revision current at publish time.
+          title: Revision Number
+          type: integer
+        created_at:
+          format: date-time
+          title: Created At
+          type: string
+        updated_at:
+          format: date-time
+          title: Updated At
+          type: string
+      required:
+      - knowledge_source_id
+      - workspace_id
+      - name
+      - file_name
+      - size_bytes
+      - chunk_count
+      - revision_number
+      - created_at
+      - updated_at
+      title: PublicKnowledgeSourceSummary
+      type: object
+    PublicDependentAgent:
+      properties:
+        agent_id:
+          title: Agent Id
+          type: string
+        name:
+          title: Name
+          type: string
+      required:
+      - agent_id
+      - name
+      title: PublicDependentAgent
+      type: object
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer

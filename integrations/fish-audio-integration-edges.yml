@@ -54,7 +54,7 @@ edges:
     - tts
     vendor_domain: fish.audio
     hub_org_models_in_top_1000: 5
-    hub_org_downloads: 44702
+    hub_org_downloads: 55550
   matched_by: verified-domain-table
   detected_by: sweep-voice-ai.py
   first_seen: '2026-10-15'

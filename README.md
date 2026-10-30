@@ -1,4 +1,4 @@
-# Fish Audio (fish-audio)
+# Fish Audio
 
 <!-- API-EVANGELIST-PROVENANCE:BEGIN -->
 > ### About this repository
@@ -66,75 +66,132 @@
 
 Fish Audio is an AI voice platform offering text-to-speech, voice cloning, speech-to-text, voice changing, and audio storytelling capabilities. The platform hosts a library of over two million voices across 30+ languages and is built around the Fish Speech open-source TTS model and the proprietary Fish Audio S2-Pro model. Fish Audio exposes a public REST API at api.fish.audio with first-party Python, Go, and TypeScript SDKs and supports voice cloning from as little as fifteen seconds of reference audio. The developer surface emphasizes ultra-low latency streaming, emotion control, and pay-as-you-go pricing for both prototype and production workloads.
 
-**APIs.json:** [https://raw.githubusercontent.com/api-evangelist/fish-audio/refs/heads/main/apis.yml](https://raw.githubusercontent.com/api-evangelist/fish-audio/refs/heads/main/apis.yml)
+**Areas:** Voice · Text-to-Speech · Speech-to-Text · Voice Cloning · Audio · Generative AI · Multilingual · Streaming · SDK · Open Source
 
-## Scope
+## Fish Audio on APIs.io
 
-- **Type:** Index
-- **Position:** Provider
-- **Access:** 3rd-Party
+Everything profiled for Fish Audio is published on APIs.io rather than in this repository. Start at the provider page — **[apis.io/providers/fish-audio/](https://apis.io/providers/fish-audio/)** — or go straight to one of the APIs or properties below.
 
-## Tags
+### APIs (5)
 
-- Voice
-- Text to Speech
-- Speech to Text
-- Voice Cloning
-- Audio
-- Generative AI
-- Multilingual
-- Streaming
-- SDK
-- Open Source
+- [Fish Audio API](https://apis.io/apis/fish-audio/fish-audio-api/) — The Fish Audio API provides RESTful access to text-to-speech, speech-to-text, voice cloning, and voice management capabilities backed by the Fish Audio…
+- [Fish Audio Asr API](https://apis.io/apis/fish-audio/fish-audio-asr-api/) — The Asr API from Fish Audio — 1 operation(s) for asr.
+- [Fish Audio Model API](https://apis.io/apis/fish-audio/fish-audio-model-api/) — The Model API from Fish Audio — 2 operation(s) for model.
+- [Fish Audio Tts API](https://apis.io/apis/fish-audio/fish-audio-tts-api/) — The Tts API from Fish Audio — 2 operation(s) for tts.
+- [Fish Audio Wallet API](https://apis.io/apis/fish-audio/fish-audio-wallet-api/) — The Wallet API from Fish Audio — 2 operation(s) for wallet.
 
-## Timestamps
+### Published properties
 
-- **Created:** 2026-05-23
-- **Modified:** 2026-05-23
+Each property below is a page on APIs.io carrying the machine-readable artifact and what it says.
 
-## APIs
+#### MCP servers (1)
 
-### Fish Audio API
+Model Context Protocol servers that expose the API to agents.
 
-The Fish Audio API provides RESTful access to text-to-speech, speech-to-text, voice cloning, and voice management capabilities backed by the Fish Audio S2-Pro model. Endpoints support streaming low-latency generation, multilingual synthesis across 30+ languages, emotion control, and on-the-fly custom voice creation from short reference clips. The API is consumed through the Fish Audio Python, Go, and TypeScript SDKs and a community of integrations including n8n.
+- [fish-audio](https://apis.io/servers/fish-audio/fish-audio/)
 
-- **Human URL:** [https://docs.fish.audio](https://docs.fish.audio)
-- **Base URL:** `https://api.fish.audio`
+#### Agentic access (1)
 
-#### Tags
+Which operations an agent can call, which act, and which need a human in the loop.
 
-- Text to Speech
-- Voice Cloning
-- Speech to Text
-- Streaming
-- REST
-- Audio
+- [Fish Audio Agentic Access](https://apis.io/agentic-access/fish-audio/fish-audio-agentic-access/)
 
-#### Properties
+#### Collections (5)
 
-- [Documentation](https://docs.fish.audio)
-- [Getting Started](https://docs.fish.audio/quickstart)
-- [Playground](https://fish.audio/discovery)
-- [SDK](https://github.com/fishaudio/fish-audio-python)
-- [SDK](https://github.com/fishaudio/fish-audio-go)
-- [GitHub Organization](https://github.com/fishaudio)
-- [Postman Collection](collections/fish-audio.postman_collection.json) — [Postman Collection 2.1](https://schema.getpostman.com/json/collection/v2.1.0/collection.json)
-- [Open Collection](collections/fish-audio.opencollection.json) — [Open Collection 1.0](https://schema.opencollection.com/opencollection/v1.0.0.json)
+Postman and Open Collection request collections.
 
-## Common Properties
+- [Fish Audio API](https://apis.io/collections/fish-audio/open-fish-audio/)
+- [Fish Audio Asr API](https://apis.io/collections/fish-audio/open-fish-audio-asr-api/)
+- [Fish Audio Asr Model API](https://apis.io/collections/fish-audio/open-fish-audio-model-api/)
+- [Fish Audio Asr Tts API](https://apis.io/collections/fish-audio/open-fish-audio-tts-api/)
+- [Fish Audio Asr Wallet API](https://apis.io/collections/fish-audio/open-fish-audio-wallet-api/)
+
+#### Security (2)
+
+Authentication, trust centre, and vulnerability disclosure.
+
+- [Fish Audio Authentication](https://apis.io/security/fish-audio/fish-audio-authentication/)
+- [Fish Audio Domain Security](https://apis.io/security/fish-audio/fish-audio-domain-security/)
+
+#### Plans and pricing (1)
+
+Published plans, tiers and prices.
+
+- [Fish Audio Plans Pricing](https://apis.io/plans/fish-audio/fish-audio-plans-pricing/)
+
+#### Rate limits (1)
+
+Published request limits.
+
+- [Fish Audio Rate Limits](https://apis.io/rate-limits/fish-audio/fish-audio-rate-limits/)
+
+#### FinOps (1)
+
+What the API costs to run, by operation.
+
+- [Fish Audio Finops](https://apis.io/finops/fish-audio/fish-audio-finops/)
+
+## Where to find this API
+
+Links to the company's own pages. This repository publishes no copy of their specifications — the canonical document is theirs and lives at the URLs below.
 
 - [Website](https://fish.audio)
 - [Documentation](https://docs.fish.audio)
-- [Developer  Portal](https://fish.audio/go-api)
-- [Playground](https://fish.audio/discovery)
 - [Pricing](https://fish.audio/pricing)
-- [GitHub Organization](https://github.com/fishaudio)
-- [Open Source Model](https://github.com/fishaudio/fish-speech)
-- [Discord](https://discord.gg/Es5qTB9BcN)
-- [Twitter](https://twitter.com/FishAudio)
-- [L L Ms Txt](https://docs.fish.audio/llms.txt)
+- [Blog](https://fish.audio/blog/)
+- [GitHub](https://github.com/fishaudio)
 
-## Maintainers
+## API Evangelist rating
 
-**FN:** Kin Lane
-**Email:** kin@apievangelist.com
+**Kin Score 29.5** — thin · rubric 0.25.0 · scored 2026-10-23
+
+| Facet | Score |
+|---|---|
+| Discoverability | 75.0 |
+| Contract quality | 47.9 |
+| Contract governance | 0.0 |
+| Operational transparency | 7.9 |
+| Developer ergonomics | 48.8 |
+| Access clarity | 5.3 |
+
+**Agent readiness 43.9** — agent-ready (gated down from agent-native)
+
+| Agent-readiness dimension | Result |
+|---|---|
+| Spec Presence | yes |
+| Agentic Access | derived (partial credit) |
+| Reversibility Documented | — |
+| MCP Server | verified |
+| Auth Clarity | served (partial credit) |
+| Idempotency | — |
+| Error Semantics | — |
+| OpenAPI Examples | — |
+| Rate Limit Signal | derived (partial credit) |
+| Event Surface Described | — |
+| Agent Skills | — |
+| Well Known Catalog | — |
+| Consent Identity | — |
+| Agent Card | — |
+| Dry Run Mode | — |
+| Delegated Identity | served (partial credit) |
+| Protected Resource Metadata | verified |
+| Dynamic Client Registration | yes |
+| Agentic Commerce | — |
+| Pagination Ratio | na |
+| Operation Distinctiveness | distinct |
+
+**Regulatory alignment 10.5** — AI & Biometrics
+
+The rubric is published at [github.com/api-evangelist/kin-score](https://github.com/api-evangelist/kin-score). The per-check breakdown behind these numbers — which checks were earned, partial or missed — along with score history and how this provider compares to its peers, is available at [apis.io/providers/fish-audio/](https://apis.io/providers/fish-audio/).
+
+## How this profile is made
+
+API Evangelist profiles a company's public API surface the way a developer would find it: the website, developer portal and documentation, the specifications it publishes, its public repositories, and its pricing, status and changelog pages. From that it derives the properties above — contracts split per API, workflows, schemas, collections, governance rules, plans and rate limits — and scores them against the published [Kin Score rubric](https://github.com/api-evangelist/kin-score).
+
+The artifacts are published on [APIs.io](https://apis.io), not in this repository. This repository is the public record for Fish Audio: the place to say something is wrong, missing or out of date, and to ask for a re-score or a removal.
+
+## Open an issue
+
+- **Something about this listing** — a wrong description, a missing API, a stale artifact or a question about the rating: [open an issue on this repository](https://github.com/api-evangelist/fish-audio/issues/new).
+- **A new API, or one that is not in the catalog yet** — [submit it on APIs.io](https://apis.io/add/).
+- **Anything else** — [the APIs.io inbox](https://github.com/api-search/inbox/issues/new) or [info@apievangelist.com](mailto:info@apievangelist.com).
